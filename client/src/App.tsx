@@ -21,6 +21,8 @@ import StrategyManagement from "./pages/StrategyManagement";
 import StrategyRanking from "./pages/StrategyRanking";
 import AutomatedTrading from "./pages/AutomatedTrading";
 import NotificationSettings from "./pages/NotificationSettings";
+import StockDetail from "./pages/StockDetail";
+import StockSearch from "./pages/StockSearch";
 
 
 function Router() {
@@ -39,6 +41,8 @@ function Router() {
       <Route path={"/strategy-ranking"} component={StrategyRanking} />
       <Route path={"/automated-trading"} component={AutomatedTrading} />
       <Route path={"/notification-settings"} component={NotificationSettings} />
+      <Route path={"/stock-detail"} component={StockDetail} />
+      <Route path={"/stock-search"} component={StockSearch} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
