@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { BarChart3, Home, LineChart, PieChart, Settings } from "lucide-react";
+import { Heart, Home, LineChart, BarChart3, Settings } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
 interface DashboardLayoutProps {
@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navItems = [
     { icon: Home, label: "市场概览", href: "/" },
     { icon: LineChart, label: "涨停追踪", href: "/limit-up" },
-    { icon: PieChart, label: "板块分析", href: "/sectors" },
+    { icon: Heart, label: "自选股", href: "/watchlist" },
     { icon: BarChart3, label: "深度研报", href: "/report" },
     { icon: Settings, label: "系统设置", href: "/settings" },
   ];

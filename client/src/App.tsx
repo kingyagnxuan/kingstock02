@@ -5,13 +5,18 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { StockDataProvider } from "./contexts/StockDataContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { WatchlistProvider } from "./contexts/WatchlistContext";
 import Home from "./pages/Home";
+import LimitUp from "./pages/LimitUp";
+import Watchlist from "./pages/Watchlist";
 
 
 function Router() {
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
+      <Route path={"/ "} component={Home} />
+      <Route path={"/limit-up"} component={LimitUp} />
+      <Route path={"/watchlist"} component={Watchlist} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -32,10 +37,12 @@ function App() {
         // switchable
       >
         <StockDataProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
+          <WatchlistProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </WatchlistProvider>
         </StockDataProvider>
       </ThemeProvider>
     </ErrorBoundary>
