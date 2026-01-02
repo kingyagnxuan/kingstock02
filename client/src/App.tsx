@@ -8,7 +8,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { WatchlistProvider } from "./contexts/WatchlistContext";
 import Home from "./pages/Home";
 import LimitUp from "./pages/LimitUp";
-import Watchlist from "./pages/Watchlist";
+import WatchlistEnhanced from "./pages/WatchlistEnhanced";
+import Analytics from "./pages/Analytics";
 
 
 function Router() {
@@ -16,7 +17,8 @@ function Router() {
     <Switch>
       <Route path={"/ "} component={Home} />
       <Route path={"/limit-up"} component={LimitUp} />
-      <Route path={"/watchlist"} component={Watchlist} />
+      <Route path={"/watchlist"} component={WatchlistEnhanced} />
+      <Route path={"/analytics"} component={Analytics} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

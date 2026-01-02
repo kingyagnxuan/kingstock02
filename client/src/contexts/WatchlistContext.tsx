@@ -1,5 +1,7 @@
 import { AIAnalysis, FilterConfig, SortConfig, WatchlistStock } from "@/lib/types";
 import { mockAIAnalyses } from "@/lib/mockAIData";
+import { PriceAlert, StockStatistics, AIAccuracy } from "@/lib/extendedTypes";
+import { mockStockStatistics, mockAIAccuracy } from "@/lib/mockHistoricalData";
 import React, { createContext, useContext, useState } from "react";
 
 interface WatchlistContextType {
@@ -12,6 +14,12 @@ interface WatchlistContextType {
   setSortConfig: (config: SortConfig) => void;
   filterConfig: FilterConfig;
   setFilterConfig: (config: FilterConfig) => void;
+  alerts: PriceAlert[];
+  addAlert: (alert: PriceAlert) => void;
+  removeAlert: (id: string) => void;
+  triggerAlert: (id: string) => void;
+  getStockStatistics: (code: string) => StockStatistics | undefined;
+  getAIAccuracy: () => AIAccuracy;
 }
 
 const WatchlistContext = createContext<WatchlistContextType | undefined>(undefined);
@@ -23,6 +31,7 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
     order: "desc"
   });
   const [filterConfig, setFilterConfig] = useState<FilterConfig>({});
+  const [alerts, setAlerts] = useState<PriceAlert[]>([]);
 
   const addToWatchlist = (stock: WatchlistStock) => {
     if (!watchlist.find(w => w.code === stock.code)) {
@@ -42,6 +51,26 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
     return mockAIAnalyses[code];
   };
 
+  const addAlert = (alert: PriceAlert) => {
+    setAlerts([...alerts, alert]);
+  };
+
+  const removeAlert = (id: string) => {
+    setAlerts(alerts.filter(a => a.id !== id));
+  };
+
+  const triggerAlert = (id: string) => {
+    setAlerts(alerts.map(a => a.id === id ? { ...a, triggeredAt: new Date() } : a));
+  };
+
+  const getStockStatistics = (code: string): StockStatistics | undefined => {
+    return mockStockStatistics[code];
+  };
+
+  const getAIAccuracy = (): AIAccuracy => {
+    return mockAIAccuracy;
+  };
+
   return (
     <WatchlistContext.Provider
       value={{
@@ -53,7 +82,13 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
         sortConfig,
         setSortConfig,
         filterConfig,
-        setFilterConfig
+        setFilterConfig,
+        alerts,
+        addAlert,
+        removeAlert,
+        triggerAlert,
+        getStockStatistics,
+        getAIAccuracy
       }}
     >
       {children}

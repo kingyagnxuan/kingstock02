@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { icon: Home, label: "市场概览", href: "/" },
     { icon: LineChart, label: "涨停追踪", href: "/limit-up" },
     { icon: Heart, label: "自选股", href: "/watchlist" },
-    { icon: BarChart3, label: "深度研报", href: "/report" },
+    { icon: BarChart3, label: "AI准确率", href: "/analytics" },
     { icon: Settings, label: "系统设置", href: "/settings" },
   ];
 
