@@ -10,15 +10,18 @@ import Home from "./pages/Home";
 import LimitUp from "./pages/LimitUp";
 import WatchlistEnhanced from "./pages/WatchlistEnhanced";
 import Analytics from "./pages/Analytics";
+import Community from "./pages/Community";
 
 
 function Router() {
   return (
     <Switch>
+      <Route path={"/ "} component={Home} />
       <Route path={"/"} component={Home} />
       <Route path={"/limit-up"} component={LimitUp} />
       <Route path={"/watchlist"} component={WatchlistEnhanced} />
       <Route path={"/analytics"} component={Analytics} />
+      <Route path={"/community"} component={Community} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

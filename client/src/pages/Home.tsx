@@ -4,12 +4,32 @@ import LimitUpTable from "@/components/LimitUpTable";
 import MarketIndexCard from "@/components/MarketIndexCard";
 import { useStockData } from "@/contexts/StockDataContext";
 import { AlertTriangle, TrendingUp } from "lucide-react";
+import NotificationCenter from "@/components/NotificationCenter";
+import MarketNewsAndQuotes from "@/components/MarketNewsAndQuotes";
+import { mockNotifications, mockMarketNews } from "@/lib/mockCommunityData";
+import { useState } from "react";
 
 export default function Home() {
   const { indices, hotSectors, limitUpStocks, report, lastUpdated } = useStockData();
+  const [notifications, setNotifications] = useState(mockNotifications);
+
+  const handleMarkAsRead = (id: string) => {
+    setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+  };
+
+  const handleClearNotifications = () => {
+    setNotifications([]);
+  };
 
   return (
     <DashboardLayout>
+      <div className="fixed top-4 right-4 z-50">
+        <NotificationCenter
+          notifications={notifications}
+          onMarkAsRead={handleMarkAsRead}
+          onClear={handleClearNotifications}
+        />
+      </div>
       <div className="space-y-8">
         {/* Market Overview Section */}
         <section className="space-y-4">
