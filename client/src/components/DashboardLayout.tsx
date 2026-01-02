@@ -1,9 +1,67 @@
 import { cn } from "@/lib/utils";
-import { Heart, Home, LineChart, BarChart3, Settings, MessageSquare } from "lucide-react";
+import { Heart, Home, LineChart, BarChart3, Settings, MessageSquare, User, LogOut } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+}
+
+function UserMenu() {
+  const { user, isAuthenticated, logout } = useAuth();
+  const [, setLocation] = useLocation();
+
+  if (!isAuthenticated || !user) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full"
+        onClick={() => setLocation("/login")}
+      >
+        <User className="w-4 h-4 mr-2" />
+        登录
+      </Button>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="w-full justify-start">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-xs mr-2">
+            {user.avatar}
+          </div>
+          <span className="truncate text-xs">{user.username}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={() => setLocation("/profile")}>
+          <User className="w-4 h-4 mr-2" />
+          个人资料
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => {
+            logout();
+            setLocation("/login");
+          }}
+          className="text-destructive"
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          退出登录
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -61,7 +119,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-sidebar-border">
+        <div className="p-4 border-t border-sidebar-border space-y-3">
+          <UserMenu />
           <div className="bg-card/50 rounded-lg p-4 border border-border/50 backdrop-blur-sm">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-muted-foreground">系统状态</span>

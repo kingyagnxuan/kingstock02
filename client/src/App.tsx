@@ -6,11 +6,15 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { StockDataProvider } from "./contexts/StockDataContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { WatchlistProvider } from "./contexts/WatchlistContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import Home from "./pages/Home";
 import LimitUp from "./pages/LimitUp";
 import WatchlistEnhanced from "./pages/WatchlistEnhanced";
 import Analytics from "./pages/Analytics";
 import Community from "./pages/Community";
+import Login from "./pages/Login";
+import UserProfile from "./pages/UserProfile";
+import Search from "./pages/Search";
 
 
 function Router() {
@@ -22,6 +26,9 @@ function Router() {
       <Route path={"/watchlist"} component={WatchlistEnhanced} />
       <Route path={"/analytics"} component={Analytics} />
       <Route path={"/community"} component={Community} />
+      <Route path={"/login"} component={Login} />
+      <Route path={"/profile"} component={UserProfile} />
+      <Route path={"/search"} component={Search} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -41,14 +48,16 @@ function App() {
         defaultTheme="dark"
         // switchable
       >
-        <StockDataProvider>
-          <WatchlistProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
-          </WatchlistProvider>
-        </StockDataProvider>
+        <AuthProvider>
+          <StockDataProvider>
+            <WatchlistProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Router />
+              </TooltipProvider>
+            </WatchlistProvider>
+          </StockDataProvider>
+        </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
