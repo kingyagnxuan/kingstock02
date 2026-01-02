@@ -15,7 +15,7 @@ import Analytics from "./pages/Analytics";
 function Router() {
   return (
     <Switch>
-      <Route path={"/ "} component={Home} />
+      <Route path={"/"} component={Home} />
       <Route path={"/limit-up"} component={LimitUp} />
       <Route path={"/watchlist"} component={WatchlistEnhanced} />
       <Route path={"/analytics"} component={Analytics} />
