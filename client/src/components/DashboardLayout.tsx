@@ -73,6 +73,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { icon: Heart, label: "自选股", href: "/watchlist" },
     { icon: BarChart3, label: "AI准确率", href: "/analytics" },
     { icon: Zap, label: "投资策略", href: "/strategy" },
+    { icon: Zap, label: "策略排行", href: "/strategy-ranking" },
+    { icon: Zap, label: "自动交易", href: "/automated-trading" },
     { icon: MessageSquare, label: "社区讨论", href: "/community" },
     { icon: Settings, label: "系统设置", href: "/settings" },
   ];

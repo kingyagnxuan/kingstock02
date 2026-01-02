@@ -17,6 +17,8 @@ import Login from "./pages/Login";
 import UserProfile from "./pages/UserProfile";
 import Search from "./pages/Search";
 import StrategyManagement from "./pages/StrategyManagement";
+import StrategyRanking from "./pages/StrategyRanking";
+import AutomatedTrading from "./pages/AutomatedTrading";
 
 
 function Router() {
@@ -32,6 +34,8 @@ function Router() {
       <Route path={"/profile"} component={UserProfile} />
       <Route path={"/search"} component={Search} />
       <Route path={"/strategy"} component={StrategyManagement} />
+      <Route path={"/strategy-ranking"} component={StrategyRanking} />
+      <Route path={"/automated-trading"} component={AutomatedTrading} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
