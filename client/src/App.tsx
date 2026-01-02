@@ -7,6 +7,7 @@ import { StockDataProvider } from "./contexts/StockDataContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { WatchlistProvider } from "./contexts/WatchlistContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { StrategyProvider } from "./contexts/StrategyContext";
 import Home from "./pages/Home";
 import LimitUp from "./pages/LimitUp";
 import WatchlistEnhanced from "./pages/WatchlistEnhanced";
@@ -15,6 +16,7 @@ import Community from "./pages/Community";
 import Login from "./pages/Login";
 import UserProfile from "./pages/UserProfile";
 import Search from "./pages/Search";
+import StrategyManagement from "./pages/StrategyManagement";
 
 
 function Router() {
@@ -29,6 +31,7 @@ function Router() {
       <Route path={"/login"} component={Login} />
       <Route path={"/profile"} component={UserProfile} />
       <Route path={"/search"} component={Search} />
+      <Route path={"/strategy"} component={StrategyManagement} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -49,14 +52,16 @@ function App() {
         // switchable
       >
         <AuthProvider>
-          <StockDataProvider>
-            <WatchlistProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Router />
-              </TooltipProvider>
-            </WatchlistProvider>
-          </StockDataProvider>
+          <StrategyProvider>
+            <StockDataProvider>
+              <WatchlistProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Router />
+                </TooltipProvider>
+              </WatchlistProvider>
+            </StockDataProvider>
+          </StrategyProvider>
         </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
