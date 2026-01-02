@@ -8,6 +8,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { WatchlistProvider } from "./contexts/WatchlistContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { StrategyProvider } from "./contexts/StrategyContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import Home from "./pages/Home";
 import LimitUp from "./pages/LimitUp";
 import WatchlistEnhanced from "./pages/WatchlistEnhanced";
@@ -19,6 +20,7 @@ import Search from "./pages/Search";
 import StrategyManagement from "./pages/StrategyManagement";
 import StrategyRanking from "./pages/StrategyRanking";
 import AutomatedTrading from "./pages/AutomatedTrading";
+import NotificationSettings from "./pages/NotificationSettings";
 
 
 function Router() {
@@ -36,6 +38,7 @@ function Router() {
       <Route path={"/strategy"} component={StrategyManagement} />
       <Route path={"/strategy-ranking"} component={StrategyRanking} />
       <Route path={"/automated-trading"} component={AutomatedTrading} />
+      <Route path={"/notification-settings"} component={NotificationSettings} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -56,16 +59,18 @@ function App() {
         // switchable
       >
         <AuthProvider>
-          <StrategyProvider>
-            <StockDataProvider>
-              <WatchlistProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Router />
-                </TooltipProvider>
-              </WatchlistProvider>
-            </StockDataProvider>
-          </StrategyProvider>
+          <NotificationProvider>
+            <StrategyProvider>
+              <StockDataProvider>
+                <WatchlistProvider>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Router />
+                  </TooltipProvider>
+                </WatchlistProvider>
+              </StockDataProvider>
+            </StrategyProvider>
+          </NotificationProvider>
         </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>

@@ -1,8 +1,9 @@
 import { cn } from "@/lib/utils";
-import { Heart, Home, LineChart, BarChart3, Settings, MessageSquare, User, LogOut, Zap } from "lucide-react";
+import { Heart, Home, LineChart, BarChart3, Settings, MessageSquare, User, LogOut, Zap, Bell } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import NotificationCenterAdvanced from "@/components/NotificationCenterAdvanced";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -142,6 +143,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content */}
       <main className="flex-1 ml-64 min-h-screen bg-[url('/images/hero-bg.jpg')] bg-cover bg-fixed bg-center">
         <div className="min-h-screen bg-background/90 backdrop-blur-sm">
+          <div className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-md">
+            <div className="container py-4 flex items-center justify-end gap-4">
+              <NotificationCenterAdvanced />
+              <Link href="/notification-settings">
+                <Button variant="ghost" size="sm">
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
           <div className="container py-8 animate-in fade-in duration-500">
             {children}
           </div>
