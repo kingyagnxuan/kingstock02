@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TrendingUp, AlertTriangle, Moon } from "lucide-react";
+import { TrendingUp, AlertTriangle, Moon, ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function NextDayLimitUp() {
@@ -60,9 +60,17 @@ export default function NextDayLimitUp() {
 
   return (
     <div className="space-y-6">
-      {/* 页面标题 */}
+      {/* 返回按钮和页面标题 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.history.back()}
+            className="mr-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
           <Moon className="w-8 h-8 text-blue-500" />
           <div>
             <h1 className="text-3xl font-bold">次日涨停潜力</h1>

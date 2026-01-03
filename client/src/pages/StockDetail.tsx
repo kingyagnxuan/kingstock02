@@ -4,7 +4,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, TrendingUp, TrendingDown, BarChart3, PieChart, Newspaper, Loader2 } from "lucide-react";
+import { Heart, TrendingUp, TrendingDown, BarChart3, PieChart, Newspaper, Loader2, ArrowLeft } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as PieChartComponent, Pie, Cell } from "recharts";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import { getSinaStockInfo } from "@/lib/sinaFinanceAPI";
@@ -131,12 +131,21 @@ export default function StockDetail() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* 股票头部信息 */}
+        {/* 返回按钮和股票头部信息 */}
         <div className="space-y-4">
           <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">{detail.name}</h1>
-              <p className="text-muted-foreground">{code}</p>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.history.back()}
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+              <div>
+                <h1 className="text-3xl font-bold">{detail.name}</h1>
+                <p className="text-muted-foreground">{code}</p>
+              </div>
             </div>
             <Button
               variant={isInWatchlist ? "default" : "outline"}

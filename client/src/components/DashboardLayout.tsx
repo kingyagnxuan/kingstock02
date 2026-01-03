@@ -94,8 +94,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navItems = [
     { icon: Home, label: "市场概览", href: "/" },
     { icon: LineChart, label: "涨停追踪", href: "/limit-up" },
-    { icon: Flame, label: "当日涨停潜力", href: "/daily-limit-up" },
-    { icon: Flame, label: "次日涨停潜力", href: "/next-day-limit-up" },
     { icon: Heart, label: "自选股", href: "/watchlist" },
     { icon: BarChart3, label: "AI准确率", href: "/analytics" },
     { icon: Zap, label: "投资策略", href: "/strategy" },
