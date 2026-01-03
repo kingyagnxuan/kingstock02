@@ -35,25 +35,26 @@ export default function Home() {
           onClear={handleClearNotifications}
         />
       </div>
-      <div className="space-y-4 md:space-y-6 lg:space-y-8">
+      <div className="space-y-3 md:space-y-4 lg:space-y-6">
         {/* Market Overview Section */}
-        <section className="space-y-2 md:space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
+        <section className="space-y-2 md:space-y-3">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-2">
+            <h2 className="text-lg md:text-xl lg:text-2xl font-bold tracking-tight flex items-center gap-2">
               <TrendingUp className="w-5 md:w-6 h-5 md:h-6 text-primary" />
               市场概览
             </h2>
-            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-xs md:text-sm">
+            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 text-xs">
               <div className="text-xs text-muted-foreground font-mono">
-                更新时间: {lastUpdated.toLocaleTimeString()}
+                {lastUpdated.toLocaleTimeString()}
               </div>
-              <div className="text-xs md:text-sm text-muted-foreground font-mono">
+              <div className="hidden md:block text-muted-foreground">•</div>
+              <div className="text-xs text-muted-foreground font-mono">
                 {report.date}
               </div>
             </div>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
             {indices.map((index) => (
               <MarketIndexCard key={index.code} index={index} />
             ))}
@@ -64,9 +65,9 @@ export default function Home() {
         </section>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
           {/* Left Column: Limit Up Stocks (2/3 width) */}
-          <div className="lg:col-span-2 space-y-4 md:space-y-6 lg:space-y-8">
+          <div className="lg:col-span-2 space-y-3 md:space-y-4 lg:space-y-6">
             <LimitUpTable stocks={limitUpStocks} />
             
             {/* Analysis Report Preview */}
@@ -89,19 +90,19 @@ export default function Home() {
           </div>
 
           {/* Right Column: Hot Sectors & Info (1/3 width) */}
-          <div className="space-y-4 md:space-y-6 lg:space-y-8">
+          <div className="space-y-3 md:space-y-4 lg:space-y-6">
             <HotSectorsCard sectors={hotSectors} />
             
             {/* Quick Actions / Promo */}
-            <div className="bg-gradient-to-br from-primary/20 to-purple-600/20 border border-primary/20 rounded-xl p-4 md:p-6 text-center space-y-3 md:space-y-4 relative overflow-hidden group">
+            <div className="bg-gradient-to-br from-primary/20 to-purple-600/20 border border-primary/20 rounded-xl p-3 md:p-4 lg:p-6 text-center space-y-2 md:space-y-3 relative overflow-hidden group">
               <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors duration-500" />
               <div className="relative z-10">
-                <h3 className="text-lg font-bold text-primary">获取深度研报</h3>
-                <p className="text-sm text-muted-foreground mt-2 mb-4">
+                <h3 className="text-base md:text-lg font-bold text-primary">获取深度研报</h3>
+                <p className="text-xs md:text-sm text-muted-foreground mt-1 md:mt-2 mb-2 md:mb-3">
                   解锁更多涨停潜力股分析和买卖点建议
                 </p>
                 <a href="/research-reports" className="inline-block w-full">
-                  <button className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25 w-full">
+                  <button className="bg-primary text-primary-foreground px-4 md:px-6 py-1.5 md:py-2 rounded-lg text-sm md:text-base font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25 w-full">
                     立即查看
                   </button>
                 </a>

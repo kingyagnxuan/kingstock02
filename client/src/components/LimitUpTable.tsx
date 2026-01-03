@@ -21,15 +21,15 @@ export default function LimitUpTable({ stocks }: LimitUpTableProps) {
   const [, setLocation] = useLocation();
   return (
     <Card className="bg-card/40 backdrop-blur-md border-border/50 overflow-hidden">
-      <CardHeader className="border-b border-border/50 pb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-              <Zap className="w-5 h-5" />
+      <CardHeader className="border-b border-border/50 pb-2 md:pb-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="p-1.5 md:p-2 rounded-lg bg-primary/10 text-primary flex-shrink-0">
+              <Zap className="w-4 md:w-5 h-4 md:h-5" />
             </div>
-            <div>
-              <CardTitle className="text-lg font-bold">涨停潜力股追踪</CardTitle>
-              <p className="text-sm text-muted-foreground">实时监控市场强势资金流向</p>
+            <div className="min-w-0">
+              <CardTitle className="text-base md:text-lg font-bold truncate">涨停潜力股追踪</CardTitle>
+              <p className="text-xs md:text-sm text-muted-foreground hidden md:block">实时监控市场强势资金流向</p>
             </div>
           </div>
           <Badge variant="outline" className="font-mono text-xs border-primary/30 text-primary bg-primary/5">
