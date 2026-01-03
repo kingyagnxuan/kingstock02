@@ -7,8 +7,8 @@ import { Streamdown } from "streamdown";
 import { Send, Plus, Download, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useRef, useEffect } from "react";
-import { FileUpload } from "@/components/FileUpload";
-import { FilePreview } from "@/components/FilePreview";
+import { FileUploadButton } from "@/components/FileUploadButton";
+import { FileList } from "@/components/FileList";
 
 export default function AskStock() {
   const { user, isAuthenticated } = useAuth();
@@ -20,6 +20,7 @@ export default function AskStock() {
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
 
   // tRPC查询和变更
   const getConversationsQuery = trpc.ai.getConversations.useQuery(undefined, {
@@ -68,13 +69,68 @@ export default function AskStock() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // 处理输入框的拖拽和粘贴
+  useEffect(() => {
+    const container = inputContainerRef.current;
+    if (!container) return;
+
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      container.classList.add("ring-2", "ring-blue-500");
+    };
+
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      container.classList.remove("ring-2", "ring-blue-500");
+    };
+
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      container.classList.remove("ring-2", "ring-blue-500");
+
+      const files = e.dataTransfer?.files;
+      if (files && files.length > 0) {
+        handleFile(files[0]);
+      }
+    };
+
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].kind === "file" && items[i].type.startsWith("image/")) {
+          const file = items[i].getAsFile();
+          if (file) {
+            handleFile(file);
+          }
+          break;
+        }
+      }
+    };
+
+    container.addEventListener("dragover", handleDragOver);
+    container.addEventListener("dragleave", handleDragLeave);
+    container.addEventListener("drop", handleDrop);
+    container.addEventListener("paste", handlePaste);
+
+    return () => {
+      container.removeEventListener("dragover", handleDragOver);
+      container.removeEventListener("dragleave", handleDragLeave);
+      container.removeEventListener("drop", handleDrop);
+      container.removeEventListener("paste", handlePaste);
+    };
+  }, []);
+
   // 创建新对话
   const handleNewConversation = async () => {
     try {
       await createConversationMutation.mutateAsync({
         title: `问票对话 ${new Date().toLocaleString()}`,
       });
-      // 重新加载对话列表
       await getConversationsQuery.refetch();
       toast.success("新对话已创建");
     } catch (error) {
@@ -96,7 +152,6 @@ export default function AskStock() {
         message: userMessage,
       });
 
-      // 添加用户消息和AI回复到消息列表
       setMessages([
         ...messages,
         {
@@ -123,7 +178,7 @@ export default function AskStock() {
   };
 
   // 处理文件上传
-  const handleFileSelect = async (file: File, base64?: string) => {
+  const handleFile = async (file: File) => {
     if (!currentConversationId) {
       toast.error("请先创建对话");
       return;
@@ -133,16 +188,23 @@ export default function AskStock() {
     try {
       const isImage = file.type.startsWith("image/");
 
-      if (isImage && base64) {
-        // 分析图片
-        const result = await analyzeImageMutation.mutateAsync({
-          fileId: Date.now(),
-          base64Data: base64.split(",")[1] || base64,
-          fileName: file.name,
-        });
-        toast.success("图片分析完成");
+      if (isImage) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const base64 = e.target?.result as string;
+          try {
+            await analyzeImageMutation.mutateAsync({
+              fileId: Date.now(),
+              base64Data: base64.split(",")[1] || base64,
+              fileName: file.name,
+            });
+            toast.success("图片已分析");
+          } catch (error) {
+            toast.error("图片分析失败");
+          }
+        };
+        reader.readAsDataURL(file);
       } else {
-        // 分析文档
         const reader = new FileReader();
         reader.onload = async (e) => {
           const text = e.target?.result as string;
@@ -152,7 +214,7 @@ export default function AskStock() {
               extractedText: text,
               fileType: file.type.includes("pdf") ? "pdf" : "document",
             });
-            toast.success("文档分析完成");
+            toast.success("文档已分析");
           } catch (error) {
             toast.error("文档分析失败");
           }
@@ -160,7 +222,6 @@ export default function AskStock() {
         reader.readAsText(file);
       }
 
-      // 重新加载文件列表
       await getConversationFilesQuery.refetch();
     } catch (error) {
       toast.error("文件处理失败");
@@ -173,7 +234,6 @@ export default function AskStock() {
   const handleExport = async () => {
     if (!currentConversationId) return;
     try {
-      // 构建对话文本
       const text = [
         `对话标题: ${conversations.find((c) => c.id === currentConversationId)?.title || ""}`,
         `创建时间: ${new Date().toLocaleString()}`,
@@ -186,7 +246,6 @@ export default function AskStock() {
         }),
       ].join("\n");
 
-      // 创建下载链接
       const element = document.createElement("a");
       element.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(text));
       element.setAttribute(
@@ -211,7 +270,6 @@ export default function AskStock() {
       const result = await generateReportMutation.mutateAsync({
         conversationId: currentConversationId,
       });
-      // 创建下载链接
       const element = document.createElement("a");
       element.setAttribute("href", "data:text/markdown;charset=utf-8," + encodeURIComponent(result.content));
       element.setAttribute("download", result.filename);
@@ -335,36 +393,22 @@ export default function AskStock() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* 文件上传区域 */}
-            <div className="border-t border-border bg-card/50 p-4">
-              <FileUpload onFileSelect={handleFileSelect} isLoading={isUploadingFile} />
-            </div>
-
             {/* 已上传文件列表 */}
             {uploadedFiles.length > 0 && (
-              <div className="border-t border-border bg-card/50 p-4 max-h-48 overflow-y-auto">
-                <h3 className="text-sm font-medium mb-3">已上传文件</h3>
-                <div className="space-y-2">
-                  {uploadedFiles.map((file) => (
-                    <FilePreview
-                      key={file.id}
-                      fileName={file.fileName}
-                      fileType={file.fileType}
-                      mimeType={file.mimeType}
-                      s3Url={file.s3Url}
-                      extractedText={file.extractedText}
-                      analysisResult={file.analysisResult ? JSON.parse(file.analysisResult) : undefined}
-                    />
-                  ))}
-                </div>
+              <div className="border-t border-border bg-card/50 p-4">
+                <p className="text-xs font-medium text-muted-foreground mb-2">已上传文件</p>
+                <FileList files={uploadedFiles} />
               </div>
             )}
 
             {/* 输入区域 */}
             <div className="border-t border-border bg-card/50 p-4">
-              <div className="flex gap-2">
+              <div
+                ref={inputContainerRef}
+                className="flex gap-2 rounded-lg transition-all"
+              >
                 <Input
-                  placeholder="输入您的问题..."
+                  placeholder="输入您的问题...（支持拖拽和粘贴图片）"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={(e) => {
@@ -374,6 +418,11 @@ export default function AskStock() {
                     }
                   }}
                   disabled={isLoading}
+                  className="flex-1"
+                />
+                <FileUploadButton
+                  onFileSelect={handleFile}
+                  isLoading={isUploadingFile}
                 />
                 <Button
                   onClick={handleSendMessage}
