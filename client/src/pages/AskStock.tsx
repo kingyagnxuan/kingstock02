@@ -419,9 +419,9 @@ export default function AskStock() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background flex-col md:flex-row">
       {/* 侧边栏 - 对话列表 */}
-      <aside className="w-64 border-r border-border bg-card/50 flex flex-col">
+      <aside className="hidden md:flex md:w-64 border-r border-border bg-card/50 flex-col">
         <div className="p-4 border-b border-border space-y-3">
           <Button onClick={handleNewConversation} className="w-full" variant="default">
             <Plus className="w-4 h-4 mr-2" />
@@ -522,7 +522,7 @@ export default function AskStock() {
                   }`}
                 >
                   <div
-                    className={`max-w-2xl rounded-lg p-4 ${
+                    className={`max-w-xs md:max-w-2xl rounded-lg p-3 md:p-4 text-sm md:text-base ${
                       message.role === "user"
                         ? "bg-primary text-primary-foreground"
                         : "bg-card border border-border"
@@ -553,7 +553,7 @@ export default function AskStock() {
         <div className="border-t border-border bg-card/50 p-3 md:p-4">
           <div
             ref={inputContainerRef}
-            className="flex items-end gap-2 rounded-lg border border-border bg-background p-2"
+            className="flex items-end gap-1 md:gap-2 rounded-lg border border-border bg-background p-2"
           >
             <Input
               value={inputValue}
@@ -565,20 +565,20 @@ export default function AskStock() {
                 }
               }}
               disabled={isLoading}
-              className="flex-1 border-0 bg-transparent focus-visible:ring-0 px-0"
-              placeholder="输入您的问题...（支持拖拽和粘贴图片）"
+              className="flex-1 border-0 bg-transparent focus-visible:ring-0 px-0 text-sm md:text-base"
+              placeholder="输入您的问题..."
             />
 
             {/* 右边操作按预 */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5 md:gap-1">
               <Button
                 onClick={handleFileButtonClick}
                 disabled={isUploadingFile}
                 variant="ghost"
                 size="sm"
-                className="p-2 h-auto"
+                className="p-1.5 md:p-2 h-auto"
               >
-                <Paperclip className="w-5 h-5" />
+                <Paperclip className="w-4 md:w-5 h-4 md:h-5" />
               </Button>
               <input
                 ref={fileInputRef}
@@ -589,20 +589,20 @@ export default function AskStock() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="p-2 h-auto"
+                className="p-1.5 md:p-2 h-auto hidden md:flex"
               >
-                <Mic className="w-5 h-5" />
+                <Mic className="w-4 md:w-5 h-4 md:h-5" />
               </Button>
               <Button
                 onClick={handleSendMessage}
                 disabled={isLoading || !inputValue.trim()}
                 size="sm"
-                className="p-2 h-auto rounded-full bg-foreground text-background hover:bg-foreground/90"
+                className="p-1.5 md:p-2 h-auto rounded-full bg-foreground text-background hover:bg-foreground/90"
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin" />
                 ) : (
-                  <Send className="w-5 h-5" />
+                  <Send className="w-4 md:w-5 h-4 md:h-5" />
                 )}
               </Button>
             </div>

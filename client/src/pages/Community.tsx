@@ -7,9 +7,9 @@ import { MessageSquare } from "lucide-react";
 export default function Community() {
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+      <div className="space-y-4 md:space-y-6 lg:space-y-8">
+        <section className="space-y-2 md:space-y-4">
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
             <MessageSquare className="w-6 h-6 text-primary" />
             社区中心
           </h2>
@@ -18,7 +18,7 @@ export default function Community() {
           </p>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Main Discussion Area */}
           <div className="lg:col-span-2">
             <CommunityDiscussion

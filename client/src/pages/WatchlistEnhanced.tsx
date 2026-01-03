@@ -25,9 +25,9 @@ export default function WatchlistEnhanced() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+      <div className="space-y-4 md:space-y-6 lg:space-y-8">
+        <section className="space-y-2 md:space-y-4">
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
             <Heart className="w-6 h-6 text-primary fill-primary" />
             我的自选股
           </h2>
@@ -63,18 +63,18 @@ export default function WatchlistEnhanced() {
                       className="pb-3 cursor-pointer"
                       onClick={() => setExpandedStock(isExpanded ? null : stock!.code)}
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <CardTitle className="text-lg">{stock!.name}</CardTitle>
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 md:gap-0">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <CardTitle className="text-base md:text-lg">{stock!.name}</CardTitle>
                             <Badge variant="secondary" className="bg-secondary/50">
                               {stock!.sector}
                             </Badge>
                           </div>
                           <p className="text-xs font-mono text-muted-foreground">{stock!.code}</p>
                         </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold font-mono">{stock!.price.toFixed(2)}</div>
+                        <div className="text-left md:text-right">
+                          <div className="text-xl md:text-2xl font-bold font-mono">{stock!.price.toFixed(2)}</div>
                           <Badge className={cn(
                             "font-mono font-bold border-0",
                             stock!.changePercent >= 0
