@@ -3,8 +3,30 @@ import { publicProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { dailyLimitUpPotentials, nextDayLimitUpPotentials } from "../../drizzle/schema";
 import { eq, desc, and } from "drizzle-orm";
+import { manualUpdateAll } from "../lib/scheduler";
+import {
+  getStockRealTimeData,
+  calculateDailyLimitUpPotential,
+  calculateNextDayLimitUpPotential,
+  saveDailyAnalysisResult,
+  saveNextDayAnalysisResult,
+} from "../lib/analysisService";
 
 export const limitUpRouter = router({
+  /**
+   * 手动触发全量更新（用于测试）
+   */
+  manualUpdate: publicProcedure
+    .mutation(async () => {
+      try {
+        await manualUpdateAll();
+        return { success: true, message: "已触发全量更新" };
+      } catch (error) {
+        console.error("手动更新失败:", error);
+        return { success: false, message: "更新失败" };
+      }
+    }),
+
   /**
    * 获取当日涨停潜力股列表
    */

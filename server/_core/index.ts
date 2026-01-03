@@ -7,6 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { startScheduler } from "../lib/scheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -59,6 +60,17 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
+    // 启动涨停潜力股定时更新任务
+    const stopScheduler = startScheduler();
+    // 优雅关闭
+    process.on("SIGTERM", () => {
+      console.log("收到SIGTERM信号，正在关闭服务器...");
+      stopScheduler();
+      server.close(() => {
+        console.log("服务器已关闭");
+        process.exit(0);
+      });
+    });
   });
 }
 
