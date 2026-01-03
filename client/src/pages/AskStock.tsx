@@ -458,8 +458,8 @@ export default function AskStock() {
                       <Card
                         className={`max-w-2xl ${
                           msg.role === "user"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted"
+                            ? "bg-primary/10 border-primary/20 text-foreground"
+                            : "bg-muted/50 border-border/50 text-foreground"
                         }`}
                       >
                         <CardContent className="p-4">
