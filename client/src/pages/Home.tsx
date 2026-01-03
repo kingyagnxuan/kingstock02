@@ -1,7 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
 import HotSectorsCard from "@/components/HotSectorsCard";
-import LimitUpTable from "@/components/LimitUpTable";
+import LimitUpCardList from "@/components/LimitUpCardList";
 import MarketIndexCard from "@/components/MarketIndexCard";
 import { useStockData } from "@/contexts/StockDataContext";
 import { AlertTriangle, TrendingUp } from "lucide-react";
@@ -68,7 +68,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
           {/* Left Column: Limit Up Stocks (2/3 width) */}
           <div className="lg:col-span-2 space-y-3 md:space-y-4 lg:space-y-6">
-            <LimitUpTable stocks={limitUpStocks} />
+            <LimitUpCardList stocks={limitUpStocks} maxItems={5} />
             
             {/* Analysis Report Preview */}
             <div className="bg-card/40 backdrop-blur-md border border-border/50 rounded-xl p-6 space-y-4">
