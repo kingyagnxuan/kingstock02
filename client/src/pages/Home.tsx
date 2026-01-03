@@ -92,9 +92,11 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground mt-2 mb-4">
                   解锁更多涨停潜力股分析和买卖点建议
                 </p>
-                <button className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25 w-full">
-                  立即查看
-                </button>
+                <a href="/research-reports" className="inline-block w-full">
+                  <button className="bg-primary text-primary-foreground px-6 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25 w-full">
+                    立即查看
+                  </button>
+                </a>
               </div>
             </div>
           </div>

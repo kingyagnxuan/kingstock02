@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Heart, Home, LineChart, BarChart3, Settings, MessageSquare, User, LogOut, Zap, Bell, Search, Moon, Sun } from "lucide-react";
+import { Heart, Home, LineChart, BarChart3, Settings, MessageSquare, User, LogOut, Zap, Bell, Search, Moon, Sun, BookOpen } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -99,6 +99,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { icon: Zap, label: "策略排行", href: "/strategy-ranking" },
     { icon: Zap, label: "自动交易", href: "/automated-trading" },
     { icon: MessageSquare, label: "社区讨论", href: "/community" },
+    { icon: BookOpen, label: "深度研报", href: "/research-reports" },
     { icon: Settings, label: "系统设置", href: "/settings" },
   ];
 

@@ -21,15 +21,14 @@ import StrategyManagement from "./pages/StrategyManagement";
 import StrategyRanking from "./pages/StrategyRanking";
 import AutomatedTrading from "./pages/AutomatedTrading";
 import NotificationSettings from "./pages/NotificationSettings";
+import Settings from "./pages/Settings";
+import ResearchReports from "./pages/ResearchReports";
 import StockDetail from "./pages/StockDetail";
 import StockSearch from "./pages/StockSearch";
-import SettingsPage from "./pages/Settings";
-
 
 function Router() {
   return (
     <Switch>
-      <Route path={"/ "} component={Home} />
       <Route path={"/"} component={Home} />
       <Route path={"/limit-up"} component={LimitUp} />
       <Route path={"/watchlist"} component={WatchlistEnhanced} />
@@ -44,7 +43,8 @@ function Router() {
       <Route path={"/notification-settings"} component={NotificationSettings} />
       <Route path={"/stock-detail"} component={StockDetail} />
       <Route path={"/stock-search"} component={StockSearch} />
-      <Route path={"/settings"} component={SettingsPage} />
+      <Route path={"/settings"} component={Settings} />
+      <Route path={"/research-reports"} component={ResearchReports} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
