@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { User, AuthState, LoginCredentials, RegisterCredentials } from "@/lib/authTypes";
 import { mockCurrentUser, mockUsers } from "@/lib/mockAuthData";
 
@@ -15,9 +15,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
-    isLoading: false,
+    isLoading: true,
     error: undefined
   });
+
+  // 初始化认证状态 - 从localStorage恢复
+  useEffect(() => {
+    const initializeAuth = () => {
+      try {
+        const savedAuth = localStorage.getItem("auth_state");
+        if (savedAuth) {
+          const parsedAuth = JSON.parse(savedAuth);
+          setAuthState({
+            user: parsedAuth.user,
+            isAuthenticated: parsedAuth.isAuthenticated,
+            isLoading: false,
+            error: undefined
+          });
+        } else {
+          setAuthState(prev => ({ ...prev, isLoading: false }));
+        }
+      } catch (error) {
+        console.error("Failed to restore auth state:", error);
+        setAuthState(prev => ({ ...prev, isLoading: false }));
+      }
+    };
+
+    initializeAuth();
+  }, []);
 
   const login = async (credentials: LoginCredentials) => {
     setAuthState(prev => ({ ...prev, isLoading: true, error: undefined }));
@@ -27,11 +52,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // 模拟登录验证
     if (credentials.email === "demo@example.com" && credentials.password === "password") {
-      setAuthState({
+      const newAuthState = {
         user: mockCurrentUser,
         isAuthenticated: true,
         isLoading: false
-      });
+      };
+      setAuthState(newAuthState);
+      // 保存到localStorage
+      localStorage.setItem("auth_state", JSON.stringify(newAuthState));
     } else {
       setAuthState(prev => ({
         ...prev,
@@ -68,19 +96,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isVerified: false
     };
 
-    setAuthState({
+    const newAuthState = {
       user: newUser,
       isAuthenticated: true,
       isLoading: false
-    });
+    };
+    setAuthState(newAuthState);
+    // 保存到localStorage
+    localStorage.setItem("auth_state", JSON.stringify(newAuthState));
   };
 
   const logout = () => {
-    setAuthState({
+    const newAuthState = {
       user: null,
       isAuthenticated: false,
       isLoading: false
-    });
+    };
+    setAuthState(newAuthState);
+    // 清除localStorage
+    localStorage.removeItem("auth_state");
   };
 
   const updateProfile = async (updates: Partial<User>) => {
@@ -91,11 +125,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 模拟API调用延迟
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    setAuthState(prev => ({
-      ...prev,
-      user: prev.user ? { ...prev.user, ...updates } : null,
+    const updatedAuthState = {
+      ...authState,
+      user: authState.user ? { ...authState.user, ...updates } : null,
       isLoading: false
-    }));
+    };
+    setAuthState(updatedAuthState);
+    // 保存到localStorage
+    localStorage.setItem("auth_state", JSON.stringify(updatedAuthState));
   };
 
   return (

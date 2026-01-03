@@ -154,3 +154,18 @@
   - [x] 验证语音播报清洁度
   - [x] 测试各LLM模型的响应
   - [x] 测试模型切换功能
+
+
+## 第十七阶段：问票认证问题修复（完成）
+- [x] 诊断认证状态检查问题
+  - [x] 检查useAuth hook的实现
+  - [x] 发现两个不同的useAuth实现
+  - [x] 确定真实的OAuth认证来自@/_core/hooks/useAuth
+- [x] 修复useAuth hook的状态获取
+  - [x] 更新AskStock.tsx使用真实OAuth useAuth
+  - [x] 修复从@/contexts/AuthContext到@/_core/hooks/useAuth的导入
+  - [x] 添加loading状态处理
+- [x] 测试认证功能
+  - [x] 验证登录后可访问问票
+  - [x] 验证未登录时显示登录提示
+  - [x] 验证LLM模型选择器正常显示

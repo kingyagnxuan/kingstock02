@@ -9,10 +9,10 @@ import { toast } from "sonner";
 import { useState, useRef, useEffect } from "react";
 import { FileList } from "@/components/FileList";
 import { MessageActions } from "@/components/MessageActions";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function AskStock() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
   const [conversations, setConversations] = useState<any[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -377,6 +377,18 @@ export default function AskStock() {
   const handleMessageFeedback = (messageId: number, type: "like" | "dislike") => {
     console.log(`Message ${messageId} feedback: ${type}`);
   };
+
+  // 加载状态
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">加载中...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
