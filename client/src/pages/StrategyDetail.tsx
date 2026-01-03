@@ -4,14 +4,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { strategySharingManager } from "@/lib/strategySharing";
-import { ArrowLeft, Heart, Eye, MessageCircle, TrendingUp, Trophy, Download } from "lucide-react";
+import { ArrowLeft, Heart, Eye, MessageCircle, TrendingUp, Trophy, Download, Plus } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState } from "react";
+import { useWatchlist } from "@/contexts/WatchlistContext";
 
 export default function StrategyDetail() {
   const [, setLocation] = useLocation();
   const [match, params] = useRoute("/strategy-detail/:id");
   const [isLiked, setIsLiked] = useState(false);
+  const { addToWatchlist } = useWatchlist();
+
+  const RECOMMENDED_STOCKS = [
+    { code: "300058", name: "蓝色光标", price: 12.45, change: 20.0, pe: 25.3, pb: 1.8 },
+    { code: "600363", name: "联创光电", price: 38.88, change: 10.0, pe: 18.5, pb: 2.1 },
+    { code: "300516", name: "久之洋", price: 42.60, change: 20.0, pe: 32.1, pb: 3.2 },
+    { code: "002131", name: "利欧股份", price: 3.52, change: 10.0, pe: 12.4, pb: 0.9 },
+    { code: "601698", name: "中国卫通", price: 22.15, change: 10.0, pe: 28.7, pb: 1.5 },
+  ];
+
+  const handleAddToWatchlist = (stock: typeof RECOMMENDED_STOCKS[0]) => {
+    addToWatchlist({
+      code: stock.code,
+      name: stock.name,
+      addedAt: new Date(),
+    });
+  };
 
   if (!match) {
     return null;
@@ -256,6 +274,54 @@ export default function StrategyDetail() {
                     <span className="font-bold">{ranking.followers}</span>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Recommended Stocks */}
+            <Card className="bg-card/40 backdrop-blur-md border-border/50">
+              <CardHeader>
+                <CardTitle>推荐股票</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border/50">
+                        <th className="text-left py-3 px-2 text-muted-foreground font-medium">代码</th>
+                        <th className="text-left py-3 px-2 text-muted-foreground font-medium">名称</th>
+                        <th className="text-right py-3 px-2 text-muted-foreground font-medium">现价</th>
+                        <th className="text-right py-3 px-2 text-muted-foreground font-medium">涨幅</th>
+                        <th className="text-right py-3 px-2 text-muted-foreground font-medium">PE</th>
+                        <th className="text-center py-3 px-2 text-muted-foreground font-medium">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {RECOMMENDED_STOCKS.map(stock => (
+                        <tr key={stock.code} className="border-b border-border/20 hover:bg-card/20">
+                          <td className="py-3 px-2 font-mono text-xs">{stock.code}</td>
+                          <td className="py-3 px-2 text-sm">{stock.name}</td>
+                          <td className="py-3 px-2 text-right font-semibold">{stock.price.toFixed(2)}</td>
+                          <td className="py-3 px-2 text-right">
+                            <span className={stock.change >= 0 ? "text-green-500" : "text-red-500"}>
+                              {stock.change >= 0 ? "+" : ""}{stock.change.toFixed(1)}%
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-right text-muted-foreground">{stock.pe.toFixed(1)}</td>
+                          <td className="py-3 px-2 text-center">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleAddToWatchlist(stock)}
+                              className="text-xs"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </CardContent>
             </Card>
 

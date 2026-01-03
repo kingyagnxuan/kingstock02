@@ -5,6 +5,7 @@ import { useStrategy } from "@/contexts/StrategyContext";
 import { InvestmentStrategy } from "@/lib/strategyTypes";
 import { TrendingUp, TrendingDown, Eye, Trash2, Edit2 } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 interface StrategyListProps {
   onSelectStrategy?: (strategy: InvestmentStrategy) => void;
@@ -14,12 +15,18 @@ export default function StrategyList({ onSelectStrategy }: StrategyListProps) {
   const { strategies, deleteStrategy } = useStrategy();
   const [selectedStrategies, setSelectedStrategies] = useState<string[]>([]);
 
+  const [, setLocation] = useLocation();
+
   const handleToggleSelect = (strategyId: string) => {
     setSelectedStrategies(prev =>
       prev.includes(strategyId)
         ? prev.filter(id => id !== strategyId)
         : [...prev, strategyId]
     );
+  };
+
+  const handleViewStrategy = (strategy: InvestmentStrategy) => {
+    setLocation(`/strategy-detail/${strategy.id}`);
   };
 
   const getStatusColor = (status: string) => {
@@ -65,7 +72,7 @@ export default function StrategyList({ onSelectStrategy }: StrategyListProps) {
                 ? "border-primary ring-1 ring-primary"
                 : "hover:border-border"
             }`}
-            onClick={() => handleToggleSelect(strategy.id)}
+            onClick={() => handleViewStrategy(strategy)}
           >
             <CardContent className="p-6">
               <div className="flex items-start justify-between gap-4 mb-4">
