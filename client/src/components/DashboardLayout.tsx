@@ -91,7 +91,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
           <div className="space-y-2">
             <h1 className="text-2xl font-bold tracking-tight">StockTracker</h1>
-            <p className="text-sm text-muted-foreground">A股票投资专家</p>
+            <p className="text-sm text-muted-foreground">股票投资专家</p>
           </div>
         </div>
 
@@ -125,7 +125,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </nav>
 
         <div className="p-4 border-t border-sidebar-border space-y-3">
-          <UserMenu />
           <div className="bg-card/50 rounded-lg p-4 border border-border/50 backdrop-blur-sm">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-muted-foreground">系统状态</span>
