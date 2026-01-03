@@ -1,5 +1,5 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import EnhancedLimitUpTable from "@/components/EnhancedLimitUpTable";
+import LimitUpCardGrid from "@/components/LimitUpCardGrid";
 import { useStockData } from "@/contexts/StockDataContext";
 import { Zap } from "lucide-react";
 
@@ -19,7 +19,7 @@ export default function LimitUp() {
           </p>
         </section>
 
-        <EnhancedLimitUpTable stocks={limitUpStocks} />
+        <LimitUpCardGrid stocks={limitUpStocks} />
       </div>
     </DashboardLayout>
   );
