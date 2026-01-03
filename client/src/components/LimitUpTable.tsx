@@ -11,12 +11,14 @@ import {
 import { Stock } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { TrendingUp, Zap } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface LimitUpTableProps {
   stocks: Stock[];
 }
 
 export default function LimitUpTable({ stocks }: LimitUpTableProps) {
+  const [, setLocation] = useLocation();
   return (
     <Card className="bg-card/40 backdrop-blur-md border-border/50 overflow-hidden">
       <CardHeader className="border-b border-border/50 pb-4">
@@ -50,7 +52,7 @@ export default function LimitUpTable({ stocks }: LimitUpTableProps) {
           </TableHeader>
           <TableBody>
             {stocks.map((stock) => (
-              <TableRow key={stock.code} className="hover:bg-muted/30 border-border/50 group transition-colors">
+              <TableRow key={stock.code} className="hover:bg-muted/30 border-border/50 group transition-colors cursor-pointer" onClick={() => setLocation(`/stock-detail?code=${stock.code}`)}>
                 <TableCell className="font-mono text-muted-foreground group-hover:text-foreground transition-colors">
                   {stock.code}
                 </TableCell>

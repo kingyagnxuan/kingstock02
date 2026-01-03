@@ -4,6 +4,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import NotificationCenterAdvanced from "@/components/NotificationCenterAdvanced";
+import TopSearchBar from "@/components/TopSearchBar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -89,9 +90,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
             <img src="/images/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
           </div>
-          <div>
-            <h1 className="font-bold text-lg tracking-tight">StockTracker</h1>
-            <p className="text-xs text-muted-foreground">A股涨停潜力追踪</p>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold tracking-tight">StockTracker</h1>
+            <p className="text-sm text-muted-foreground">A股票投资专家</p>
           </div>
         </div>
 
@@ -145,13 +146,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <main className="flex-1 ml-64 min-h-screen bg-[url('/images/hero-bg.jpg')] bg-cover bg-fixed bg-center">
         <div className="min-h-screen bg-background/90 backdrop-blur-sm">
           <div className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-md">
-            <div className="container py-4 flex items-center justify-end gap-4">
-              <NotificationCenterAdvanced />
-              <Link href="/notification-settings">
-                <Button variant="ghost" size="sm">
-                  <Settings className="w-4 h-4" />
-                </Button>
-              </Link>
+            <div className="container py-3 flex items-center justify-between gap-4">
+              <TopSearchBar />
+              <div className="flex items-center gap-2">
+                <NotificationCenterAdvanced />
+                <Link href="/notification-settings">
+                  <Button variant="ghost" size="sm">
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </Link>
+                <UserMenu />
+              </div>
             </div>
           </div>
           <div className="container py-8 animate-in fade-in duration-500">

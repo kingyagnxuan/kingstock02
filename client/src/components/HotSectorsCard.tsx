@@ -3,12 +3,14 @@ import { Progress } from "@/components/ui/progress";
 import { HotSector } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Flame } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface HotSectorsCardProps {
   sectors: HotSector[];
 }
 
 export default function HotSectorsCard({ sectors }: HotSectorsCardProps) {
+  const [, setLocation] = useLocation();
   return (
     <Card className="bg-card/40 backdrop-blur-md border-border/50 h-full">
       <CardHeader className="border-b border-border/50 pb-4">
@@ -43,7 +45,7 @@ export default function HotSectorsCard({ sectors }: HotSectorsCardProps) {
             </div>
             
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>龙头: <span className="text-foreground font-medium">{sector.leadingStock}</span></span>
+              <span>龙头: <span className="text-foreground font-medium cursor-pointer hover:text-primary transition-colors" onClick={(e) => { e.stopPropagation(); setLocation(`/stock-detail?code=${sector.leadingStock}`); }}>{sector.leadingStock}</span></span>
               <span>净流入: <span className="text-[var(--chart-1)] font-mono">{sector.netInflow}亿</span></span>
             </div>
             
