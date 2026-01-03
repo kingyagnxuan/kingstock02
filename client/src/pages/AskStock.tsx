@@ -10,7 +10,6 @@ import { useState, useRef, useEffect } from "react";
 import { FileList } from "@/components/FileList";
 import { MessageActions } from "@/components/MessageActions";
 import { useAuth } from "@/_core/hooks/useAuth";
-import VoiceControl from "@/components/VoiceControl";
 
 export default function AskStock() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -502,17 +501,14 @@ export default function AskStock() {
                   </div>
                 </div>
                 {message.role === "assistant" && (
-                  <div className="space-y-2">
-                    <VoiceControl text={message.content} />
-                    <MessageActions
-                      messageId={message.id}
-                      content={message.content}
-                      role="assistant"
-                      onRegenerate={() => handleRegenerateMessage(message.id)}
-                      onShare={() => handleShareMessage(message.id, message.content)}
-                      onFeedback={(type) => handleMessageFeedback(message.id, type)}
-                    />
-                  </div>
+                  <MessageActions
+                    messageId={message.id}
+                    content={message.content}
+                    role="assistant"
+                    onRegenerate={() => handleRegenerateMessage(message.id)}
+                    onShare={() => handleShareMessage(message.id, message.content)}
+                    onFeedback={(type) => handleMessageFeedback(message.id, type)}
+                  />
                 )}
               </div>
             ))
@@ -550,14 +546,6 @@ export default function AskStock() {
                 className="p-2 h-auto"
               >
                 <Paperclip className="w-5 h-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="p-2 h-auto"
-                title="语音输入"
-              >
-                <Mic className="w-5 h-5" />
               </Button>
               <input
                 ref={fileInputRef}
