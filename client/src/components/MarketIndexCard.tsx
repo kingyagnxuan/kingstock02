@@ -11,18 +11,18 @@ export default function MarketIndexCard({ index }: MarketIndexCardProps) {
   const isUp = index.change >= 0;
 
   return (
-    <Card className="bg-card/50 backdrop-blur-md border-border/50 hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
+    <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 hover:border-slate-600 transition-all duration-300 group overflow-hidden relative">
       <div className={cn(
-        "absolute top-0 left-0 w-1 h-full transition-all duration-300 opacity-80",
+        "absolute top-0 left-0 w-1 h-full transition-all duration-300 opacity-100",
         isUp ? "bg-[var(--chart-1)]" : "bg-[var(--chart-2)]",
-        "group-hover:w-1.5 group-hover:opacity-100"
+        "group-hover:w-1.5"
       )} />
       
-      <CardContent className="p-5 pl-7 bg-gradient-to-br from-transparent via-transparent to-transparent">
+      <CardContent className="p-5 pl-7">
         <div className="flex justify-between items-start mb-2">
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground">{index.name}</h3>
-            <p className="text-xs font-mono text-muted-foreground/60">{index.code}</p>
+            <h3 className="text-sm font-medium text-slate-300">{index.name}</h3>
+            <p className="text-xs font-mono text-slate-400">{index.code}</p>
           </div>
           <div className={cn(
             "px-2 py-1 rounded text-xs font-bold flex items-center gap-1",
@@ -53,7 +53,7 @@ export default function MarketIndexCard({ index }: MarketIndexCardProps) {
       
       {/* Background Glow Effect */}
       <div className={cn(
-        "absolute -right-10 -bottom-10 w-32 h-32 rounded-full blur-3xl opacity-5 pointer-events-none transition-opacity duration-500 group-hover:opacity-15",
+        "absolute -right-10 -bottom-10 w-32 h-32 rounded-full blur-3xl opacity-10 pointer-events-none transition-opacity duration-500 group-hover:opacity-20",
         isUp ? "bg-[var(--chart-1)]" : "bg-[var(--chart-2)]"
       )} />
     </Card>
