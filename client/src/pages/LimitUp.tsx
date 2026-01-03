@@ -8,9 +8,9 @@ export default function LimitUp() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        <section className="space-y-4">
-          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+      <div className="space-y-4 md:space-y-6 lg:space-y-8">
+        <section className="space-y-2 md:space-y-4">
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
             <Zap className="w-6 h-6 text-primary" />
             涨停潜力股追踪
           </h2>

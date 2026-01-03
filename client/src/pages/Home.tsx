@@ -35,9 +35,9 @@ export default function Home() {
           onClear={handleClearNotifications}
         />
       </div>
-      <div className="space-y-6 md:space-y-8">
+      <div className="space-y-4 md:space-y-6 lg:space-y-8">
         {/* Market Overview Section */}
-        <section className="space-y-4">
+        <section className="space-y-2 md:space-y-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
             <h2 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
               <TrendingUp className="w-5 md:w-6 h-5 md:h-6 text-primary" />
@@ -64,9 +64,9 @@ export default function Home() {
         </section>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
           {/* Left Column: Limit Up Stocks (2/3 width) */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-4 md:space-y-6 lg:space-y-8">
             <LimitUpTable stocks={limitUpStocks} />
             
             {/* Analysis Report Preview */}
@@ -89,11 +89,11 @@ export default function Home() {
           </div>
 
           {/* Right Column: Hot Sectors & Info (1/3 width) */}
-          <div className="space-y-8">
+          <div className="space-y-4 md:space-y-6 lg:space-y-8">
             <HotSectorsCard sectors={hotSectors} />
             
             {/* Quick Actions / Promo */}
-            <div className="bg-gradient-to-br from-primary/20 to-purple-600/20 border border-primary/20 rounded-xl p-6 text-center space-y-4 relative overflow-hidden group">
+            <div className="bg-gradient-to-br from-primary/20 to-purple-600/20 border border-primary/20 rounded-xl p-4 md:p-6 text-center space-y-3 md:space-y-4 relative overflow-hidden group">
               <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors duration-500" />
               <div className="relative z-10">
                 <h3 className="text-lg font-bold text-primary">获取深度研报</h3>
