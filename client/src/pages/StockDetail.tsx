@@ -1,10 +1,10 @@
-import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, TrendingUp, TrendingDown, BarChart3, PieChart, Newspaper } from "lucide-react";
+import { Heart, TrendingUp, TrendingDown, BarChart3, PieChart, Newspaper, Loader2 } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as PieChartComponent, Pie, Cell } from "recharts";
 import { useWatchlist } from "@/contexts/WatchlistContext";
 import {
@@ -16,23 +16,94 @@ import {
   getMockStockAnalysis,
   getKLineData
 } from "@/lib/mockStockDetail";
+import { getStockQuote, getKLineData as getRealKLineData, getCachedData, setCachedData } from "@/lib/publicStockAPI";
 import type { KLinePeriod } from "@/lib/stockDetailTypes";
 
 export default function StockDetail() {
   const [location] = useLocation();
   const code = new URLSearchParams(location).get("code") || "000001";
   const [klinePeriod, setKlinePeriod] = useState<KLinePeriod>("1d");
+  const [loading, setLoading] = useState(false);
+  const [realTimeData, setRealTimeData] = useState<any>(null);
+  const [realKlineData, setRealKlineData] = useState<any[]>([]);
   const { watchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
 
   const isInWatchlist = watchlist.some(w => w.code === code);
 
-  const detail = getMockStockDetail(code);
+  // 加载真实行情数据
+  useEffect(() => {
+    loadRealTimeData();
+    const interval = setInterval(loadRealTimeData, 60000); // 每分钟更新一次
+    return () => clearInterval(interval);
+  }, [code]);
+
+  // 加载K线数据
+  useEffect(() => {
+    loadKlineData();
+  }, [code, klinePeriod]);
+
+  const loadRealTimeData = async () => {
+    try {
+      const quote = await getStockQuote(code);
+      if (quote) {
+        setRealTimeData(quote);
+      }
+    } catch (error) {
+      console.error("加载实时行情失败:", error);
+    }
+  };
+
+  const loadKlineData = async () => {
+    setLoading(true);
+    try {
+      const cacheKey = `kline_${code}_${klinePeriod}`;
+      const cached = getCachedData(cacheKey);
+      
+      if (cached) {
+        setRealKlineData(cached);
+        setLoading(false);
+        return;
+      }
+
+      const period = klinePeriod === "5m" ? "1d" : klinePeriod === "15m" ? "1d" : klinePeriod === "30m" ? "1d" : klinePeriod === "1h" ? "1d" : (klinePeriod as "1d" | "1w" | "1m");
+      const chartData = await getRealKLineData(code, period, 60);
+      
+      if (chartData && chartData.data.length > 0) {
+        setRealKlineData(chartData.data);
+        setCachedData(cacheKey, chartData.data);
+      } else {
+        // 使用模拟数据
+        const mockData = getKLineData(code, klinePeriod);
+        setRealKlineData(mockData.data);
+      }
+    } catch (error) {
+      console.error("加载K线数据失败:", error);
+      const mockData = getKLineData(code, klinePeriod);
+      setRealKlineData(mockData.data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 使用真实数据或模拟数据
+  const detail = realTimeData ? {
+    ...getMockStockDetail(code),
+    name: realTimeData.name,
+    price: realTimeData.price,
+    change: realTimeData.change,
+    changePercent: realTimeData.changePercent,
+    open: realTimeData.open,
+    high: realTimeData.high,
+    low: realTimeData.low,
+    volume: realTimeData.volume
+  } : getMockStockDetail(code);
+
   const cashFlow = getMockCashFlow(code);
   const fundFlow = getMockFundFlow(code);
   const technicalIndicators = getMockTechnicalIndicators(code);
   const news = getMockStockNews(code);
   const analysis = getMockStockAnalysis(code);
-  const klineData = getKLineData(code, klinePeriod);
+  const klineData = realKlineData.length > 0 ? realKlineData : getKLineData(code, klinePeriod).data;
 
   const handleAddToWatchlist = () => {
     if (!isInWatchlist) {
@@ -79,100 +150,86 @@ export default function StockDetail() {
       "sell": "看空",
       "strong-sell": "强烈看空"
     };
-    return labels[rating] || rating;
+    return labels[rating] || "未评级";
   };
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <section className="space-y-4">
+        {/* 股票头部信息 */}
+        <div className="space-y-4">
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-4xl font-bold">{detail.name}</h1>
-                <span className="text-2xl text-muted-foreground">{code}</span>
-              </div>
-              <p className="text-muted-foreground">{detail.industry} | {detail.description}</p>
+              <h1 className="text-3xl font-bold">{detail.name}</h1>
+              <p className="text-muted-foreground">{code}</p>
             </div>
             <Button
-              onClick={handleAddToWatchlist}
               variant={isInWatchlist ? "default" : "outline"}
-              size="lg"
+              onClick={handleAddToWatchlist}
               className="gap-2"
             >
-              <Heart className={`w-5 h-5 ${isInWatchlist ? "fill-current" : ""}`} />
-              {isInWatchlist ? "已添加自选" : "添加自选"}
+              <Heart className="w-4 h-4" fill={isInWatchlist ? "currentColor" : "none"} />
+              {isInWatchlist ? "已收藏" : "收藏"}
             </Button>
           </div>
 
-          {/* Price Info */}
           <div className="grid grid-cols-4 gap-4">
             <Card className="bg-card/40 backdrop-blur-md border-border/50">
               <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-2">当前价格</p>
-                <p className="text-3xl font-bold">¥{detail.price.toFixed(2)}</p>
+                <p className="text-sm text-muted-foreground">现价</p>
+                <p className="text-2xl font-bold">{detail.price.toFixed(2)}</p>
               </CardContent>
             </Card>
-
-            <Card className={`bg-card/40 backdrop-blur-md border-border/50 ${detail.change > 0 ? "border-green-500/30" : "border-red-500/30"}`}>
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-2">涨跌</p>
-                <div className="flex items-center gap-2">
-                  {detail.change > 0 ? (
-                    <TrendingUp className="w-5 h-5 text-green-500" />
-                  ) : (
-                    <TrendingDown className="w-5 h-5 text-red-500" />
-                  )}
-                  <p className={`text-2xl font-bold ${detail.change > 0 ? "text-green-500" : "text-red-500"}`}>
-                    {detail.change > 0 ? "+" : ""}{detail.change.toFixed(2)}
-                  </p>
-                  <p className={`text-lg ${detail.change > 0 ? "text-green-500" : "text-red-500"}`}>
-                    {detail.changePercent > 0 ? "+" : ""}{detail.changePercent.toFixed(2)}%
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
             <Card className="bg-card/40 backdrop-blur-md border-border/50">
               <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-2">市盈率(PE)</p>
-                <p className="text-2xl font-bold">{detail.pe.toFixed(2)}</p>
+                <p className="text-sm text-muted-foreground">涨跌</p>
+                <p className={`text-2xl font-bold flex items-center gap-1 ${detail.change >= 0 ? "text-green-500" : "text-red-500"}`}>
+                  {detail.change >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                  {detail.change.toFixed(2)}
+                </p>
               </CardContent>
             </Card>
-
             <Card className="bg-card/40 backdrop-blur-md border-border/50">
               <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-2">市净率(PB)</p>
-                <p className="text-2xl font-bold">{detail.pb}</p>
+                <p className="text-sm text-muted-foreground">涨幅</p>
+                <p className={`text-2xl font-bold ${detail.changePercent >= 0 ? "text-green-500" : "text-red-500"}`}>
+                  {detail.changePercent.toFixed(2)}%
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-card/40 backdrop-blur-md border-border/50">
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground">成交量</p>
+                <p className="text-2xl font-bold">{(detail.volume / 1000000).toFixed(1)}M</p>
               </CardContent>
             </Card>
           </div>
-        </section>
+        </div>
 
-        {/* Tabs */}
+        {/* 选项卡 */}
         <Tabs defaultValue="kline" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-card/40 backdrop-blur-md border border-border/50">
-            <TabsTrigger value="kline">K线图</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="kline">K线</TabsTrigger>
             <TabsTrigger value="cashflow">资金流向</TabsTrigger>
             <TabsTrigger value="technical">技术指标</TabsTrigger>
-            <TabsTrigger value="analysis">分析评级</TabsTrigger>
-            <TabsTrigger value="news">相关资讯</TabsTrigger>
+            <TabsTrigger value="news">新闻</TabsTrigger>
+            <TabsTrigger value="analysis">分析</TabsTrigger>
           </TabsList>
 
-          {/* K Line */}
+          {/* K线图表 */}
           <TabsContent value="kline" className="space-y-4">
             <Card className="bg-card/40 backdrop-blur-md border-border/50">
               <CardHeader className="border-b border-border/50 pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-bold">K线图</CardTitle>
+                  <CardTitle>K线图</CardTitle>
                   <div className="flex gap-2">
-                    {["1m", "5m", "15m", "30m", "1h", "1d", "1w", "1M"].map(period => (
+                    {["1d", "1w", "1m", "3m", "6m", "1y"].map((period) => (
                       <Button
                         key={period}
-                        size="sm"
                         variant={klinePeriod === period ? "default" : "outline"}
+                        size="sm"
                         onClick={() => setKlinePeriod(period as KLinePeriod)}
+                        disabled={loading}
                       >
                         {period}
                       </Button>
@@ -181,83 +238,74 @@ export default function StockDetail() {
                 </div>
               </CardHeader>
               <CardContent className="p-6">
-                <ResponsiveContainer width="100%" height={400}>
-                  <LineChart data={klineData.data}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="time" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />                    <Bar dataKey="volume" fill="#8884d8" name="成交量" />
-                    <Line type="monotone" dataKey="open" stroke="#82ca9d" name="开盘价" />
-                    <Line type="monotone" dataKey="high" stroke="#ffc658" name="最高价" />
-                    <Line type="monotone" dataKey="low" stroke="#ff7c7c" name="最低价" />
-                  </LineChart>
-                </ResponsiveContainer>
+                {loading ? (
+                  <div className="flex items-center justify-center h-96">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={400}>
+                    <LineChart data={klineData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                      <XAxis dataKey="time" stroke="rgba(255,255,255,0.5)" />
+                      <YAxis stroke="rgba(255,255,255,0.5)" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "rgba(0,0,0,0.8)",
+                          border: "1px solid rgba(255,255,255,0.1)"
+                        }}
+                      />
+                      <Legend />
+                      <Line type="monotone" dataKey="close" stroke="#3b82f6" name="收盘价" />
+                      <Line type="monotone" dataKey="open" stroke="#10b981" name="开盘价" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
               </CardContent>
             </Card>
 
-            {/* Volume */}
+            {/* 成交量 */}
             <Card className="bg-card/40 backdrop-blur-md border-border/50">
               <CardHeader className="border-b border-border/50 pb-4">
-                <CardTitle className="text-lg font-bold">成交量</CardTitle>
+                <CardTitle>成交量</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={klineData.data}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="time" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="volume" fill="#8884d8" name="成交量" />
+                  <BarChart data={klineData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                    <XAxis dataKey="time" stroke="rgba(255,255,255,0.5)" />
+                    <YAxis stroke="rgba(255,255,255,0.5)" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "rgba(0,0,0,0.8)",
+                        border: "1px solid rgba(255,255,255,0.1)"
+                      }}
+                    />
+                    <Bar dataKey="volume" fill="#8b5cf6" name="成交量" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Cash Flow */}
+          {/* 资金流向 */}
           <TabsContent value="cashflow" className="space-y-4">
             <Card className="bg-card/40 backdrop-blur-md border-border/50">
               <CardHeader className="border-b border-border/50 pb-4">
-                <CardTitle className="text-lg font-bold flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
-                  资金流向
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={cashFlow}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="inflow" stroke="#22c55e" name="资金流入" />
-                    <Line type="monotone" dataKey="outflow" stroke="#ef4444" name="资金流出" />
-                    <Line type="monotone" dataKey="netInflow" stroke="#3b82f6" name="净流入" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* Fund Distribution */}
-            <Card className="bg-card/40 backdrop-blur-md border-border/50">
-              <CardHeader className="border-b border-border/50 pb-4">
-                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2">
                   <PieChart className="w-5 h-5" />
-                  资金分布
+                  资金流向分布
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={400}>
                   <PieChartComponent>
                     <Pie
                       data={fundFlowData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, value }) => `${name}: ¥${(value / 100000000).toFixed(2)}亿`}
-                      outerRadius={100}
+                      label={({ name, value }) => `${name}: ${value.toFixed(0)}`}
+                      outerRadius={120}
                       fill="#8884d8"
                       dataKey="value"
                     >
@@ -265,123 +313,78 @@ export default function StockDetail() {
                         <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: any) => `¥${(value / 100000000).toFixed(2)}亿`} />
+                    <Tooltip />
                   </PieChartComponent>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </TabsContent>
 
-          {/* Technical Indicators */}
-          <TabsContent value="technical" className="space-y-4">
+            {/* 资金流向详情 */}
             <div className="grid grid-cols-2 gap-4">
-              <Card className="bg-card/40 backdrop-blur-md border-border/50">
-                <CardHeader className="border-b border-border/50 pb-4">
-                  <CardTitle className="text-lg font-bold">移动平均线</CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">MA5:</span>
-                    <span className="font-semibold">{technicalIndicators.ma5.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">MA10:</span>
-                    <span className="font-semibold">{technicalIndicators.ma10.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">MA20:</span>
-                    <span className="font-semibold">{technicalIndicators.ma20.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">MA60:</span>
-                    <span className="font-semibold">{technicalIndicators.ma60.toFixed(2)}</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-card/40 backdrop-blur-md border-border/50">
-                <CardHeader className="border-b border-border/50 pb-4">
-                  <CardTitle className="text-lg font-bold">其他指标</CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">RSI:</span>
-                    <span className="font-semibold">{technicalIndicators.rsi.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">MACD DIF:</span>
-                    <span className="font-semibold">{technicalIndicators.macd.dif.toFixed(4)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">KDJ K:</span>
-                    <span className="font-semibold">{technicalIndicators.kdj.k.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">KDJ D:</span>
-                    <span className="font-semibold">{technicalIndicators.kdj.d.toFixed(2)}</span>
-                  </div>
-                </CardContent>
-              </Card>
+              {cashFlow.map((flow: any, index: number) => (
+                <Card key={index} className="bg-card/40 backdrop-blur-md border-border/50">
+                  <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">{flow.date}</p>
+                    <p className="text-lg font-bold mt-2">{(flow.netInflow || flow.netFlow || 0).toFixed(2)}万</p>
+                    <p className={`text-sm ${(flow.netInflow || flow.netFlow || 0) >= 0 ? "text-green-500" : "text-red-500"}`}>
+                      {(flow.netInflow || flow.netFlow || 0) >= 0 ? "净流入" : "净流出"}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </TabsContent>
 
-          {/* Analysis */}
-          <TabsContent value="analysis" className="space-y-4">
-            <Card className="bg-card/40 backdrop-blur-md border-border/50">
-              <CardHeader className="border-b border-border/50 pb-4">
-                <CardTitle className="text-lg font-bold">分析评级</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border border-border/50">
-                  <span className="text-muted-foreground">综合评级</span>
-                  <span className={`text-2xl font-bold ${getRatingColor(analysis.rating)}`}>
-                    {getRatingLabel(analysis.rating)}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
-                    <p className="text-sm text-muted-foreground mb-2">目标价</p>
-                    <p className="text-2xl font-bold">¥{analysis.targetPrice.toFixed(2)}</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
-                    <p className="text-sm text-muted-foreground mb-2">上涨空间</p>
-                    <p className="text-2xl font-bold text-green-500">{analysis.upside}%</p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
-                    <p className="text-sm text-muted-foreground mb-2">下跌风险</p>
-                    <p className="text-2xl font-bold text-red-500">{analysis.downside}%</p>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
-                  <p className="text-sm text-muted-foreground mb-2">分析师共识</p>
-                  <p className="text-lg font-semibold mb-2">{analysis.consensus}</p>
-                  <p className="text-sm text-muted-foreground">{analysis.analystCount}位分析师参与评级</p>
-                </div>
-              </CardContent>
-            </Card>
+          {/* 技术指标 */}
+          <TabsContent value="technical" className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              {Array.isArray(technicalIndicators) ? technicalIndicators.map((indicator: any, index: number) => (
+                <Card key={index} className="bg-card/40 backdrop-blur-md border-border/50">
+                  <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">{indicator.name}</p>
+                    <p className="text-2xl font-bold mt-2">{indicator.value.toFixed(2)}</p>
+                    <p className={`text-sm mt-2 ${indicator.signal === "buy" ? "text-green-500" : indicator.signal === "sell" ? "text-red-500" : "text-yellow-500"}`}>
+                      {indicator.signal === "buy" ? "买入信号" : indicator.signal === "sell" ? "卖出信号" : "中性"}
+                    </p>
+                  </CardContent>
+                </Card>
+              )) : null}
+            </div>
           </TabsContent>
 
-          {/* News */}
+          {/* 新闻 */}
           <TabsContent value="news" className="space-y-4">
-            {news.map(item => (
-              <Card key={item.id} className="bg-card/40 backdrop-blur-md border-border/50">
+            {news.map((item: any, index: number) => (
+              <Card key={index} className="bg-card/40 backdrop-blur-md border-border/50">
                 <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
-                    <Newspaper className="w-5 h-5 text-blue-500 flex-shrink-0 mt-1" />
+                  <div className="flex items-start gap-3">
+                    <Newspaper className="w-5 h-5 mt-1 text-primary flex-shrink-0" />
                     <div className="flex-1">
-                      <h3 className="font-semibold mb-2">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground mb-3">{item.content}</p>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{item.source}</span>
-                        <span>{item.timestamp.toLocaleDateString()}</span>
-                      </div>
+                      <p className="font-medium">{item.title}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{item.content}</p>
+                      <p className="text-xs text-muted-foreground mt-2">{item.publishTime || "未知时间"}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
+          </TabsContent>
+
+          {/* 分析 */}
+          <TabsContent value="analysis" className="space-y-4">
+            <Card className="bg-card/40 backdrop-blur-md border-border/50">
+              <CardHeader className="border-b border-border/50 pb-4">
+                <CardTitle>分析观点</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm font-medium">评级: {getRatingLabel(analysis.rating)}</p>
+                    <p className="text-sm text-muted-foreground mt-2">{(analysis as any).opinion || "暂无分析意见"}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
