@@ -29,6 +29,7 @@ import AskStock from "./pages/AskStock";
 import DailyLimitUp from "./pages/DailyLimitUp";
 import NextDayLimitUp from "./pages/NextDayLimitUp";
 import SectorDetail from "./pages/SectorDetail";
+import StrategyDetail from "./pages/StrategyDetail";
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -42,8 +43,9 @@ function Router() {
       <Route path={"/profile"} component={UserProfile} />
       <Route path={"/search"} component={Search} />
       <Route path={"/strategy"} component={StrategyManagement} />
-      <Route path={"/strategy-ranking"} component={StrategyRanking} />
-      <Route path={"/automated-trading"} component={AutomatedTrading} />
+      <Route path={"strategy-ranking"} component={StrategyRanking} />
+      <Route path={"strategy-detail/:id"} component={StrategyDetail} />
+      <Route path={"automated-trading"} component={AutomatedTrading} />
       <Route path={"/notification-settings"} component={NotificationSettings} />
       <Route path={"/stock-detail"} component={StockDetail} />
       <Route path={"/stock/:code"} component={StockDetail} />

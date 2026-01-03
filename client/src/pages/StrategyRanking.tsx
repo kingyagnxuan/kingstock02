@@ -1,12 +1,14 @@
-import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { strategySharingManager } from "@/lib/strategySharing";
 import { useState } from "react";
 import { Heart, Eye, MessageCircle, TrendingUp, Trophy, Flame } from "lucide-react";
+import { useLocation } from "wouter";
+import DashboardLayout from "@/components/DashboardLayout";
 
 export default function StrategyRanking() {
+  const [, setLocation] = useLocation();
   const [sortBy, setSortBy] = useState<"score" | "return" | "winRate" | "views" | "likes">("score");
   const [filterRisk, setFilterRisk] = useState<"all" | "low" | "medium" | "high">("all");
   const [filterDifficulty, setFilterDifficulty] = useState<"all" | "easy" | "medium" | "hard">("all");
@@ -247,7 +249,11 @@ export default function StrategyRanking() {
                         </div>
                       )}
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setLocation(`/strategy-detail/${ranking.strategy.id}`)}
+                    >
                       查看详情
                     </Button>
                   </div>
