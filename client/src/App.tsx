@@ -23,6 +23,7 @@ import AutomatedTrading from "./pages/AutomatedTrading";
 import NotificationSettings from "./pages/NotificationSettings";
 import StockDetail from "./pages/StockDetail";
 import StockSearch from "./pages/StockSearch";
+import SettingsPage from "./pages/Settings";
 
 
 function Router() {
@@ -43,6 +44,7 @@ function Router() {
       <Route path={"/notification-settings"} component={NotificationSettings} />
       <Route path={"/stock-detail"} component={StockDetail} />
       <Route path={"/stock-search"} component={StockSearch} />
+      <Route path={"/settings"} component={SettingsPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
