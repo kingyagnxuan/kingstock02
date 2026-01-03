@@ -223,10 +223,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-64 min-h-screen bg-[url('/images/hero-bg.jpg')] bg-cover bg-fixed bg-center">
-        <div className="min-h-screen bg-background/90 backdrop-blur-sm flex flex-col">
+      <main className="flex-1 md:ml-64 h-screen overflow-hidden bg-[url('/images/hero-bg.jpg')] bg-cover bg-fixed bg-center">
+        <div className="h-full bg-background/90 backdrop-blur-sm flex flex-col">
           {/* Top Navigation */}
-          <div className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-md">
+          <div className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-md flex-shrink-0">
             <div className="px-3 md:px-4 py-2 md:py-3 flex items-center justify-between gap-2 md:gap-4">
               {/* Mobile Menu Button */}
               <Button
@@ -266,7 +266,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-y-auto">
             <div className="container px-3 md:px-4 py-4 md:py-8 animate-in fade-in duration-500 max-w-full md:max-w-7xl mx-auto">
               {children}
             </div>
