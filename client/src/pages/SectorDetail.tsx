@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, TrendingUp, TrendingDown, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWatchlist } from "@/contexts/WatchlistContext";
+import { getSectorStocks } from "@/lib/sectorStockMapping";
 
 interface SectorStock {
   code: string;
@@ -47,67 +48,12 @@ export default function SectorDetail() {
   const loadSectorStocks = async () => {
     setIsLoading(true);
     try {
-      // 这里应该调用实际的API端点
-      // const response = await fetch(`/api/sectors/${sector}/stocks`);
-      // const data = await response.json();
-      
-      // 模拟数据
-      const mockData: SectorStock[] = [
-        {
-          code: "000001",
-          name: "平安银行",
-          currentPrice: 12.50,
-          priceChangePercent: 5.2,
-          volume: 125000000,
-          volumeRatio: 1.8,
-          capitalFlow: 45000000,
-          capitalFlowPercent: 85.5,
-        },
-        {
-          code: "000333",
-          name: "美的集团",
-          currentPrice: 35.80,
-          priceChangePercent: 4.5,
-          volume: 98000000,
-          volumeRatio: 1.5,
-          capitalFlow: 38000000,
-          capitalFlowPercent: 78.9,
-        },
-        {
-          code: "000002",
-          name: "万科A",
-          currentPrice: 15.30,
-          priceChangePercent: 3.1,
-          volume: 75000000,
-          volumeRatio: 1.2,
-          capitalFlow: 28000000,
-          capitalFlowPercent: 62.3,
-        },
-        {
-          code: "sh600000",
-          name: "浦发银行",
-          currentPrice: 8.95,
-          priceChangePercent: 2.05,
-          volume: 65000000,
-          volumeRatio: 1.0,
-          capitalFlow: 15000000,
-          capitalFlowPercent: 10.0,
-        },
-        {
-          code: "sh600519",
-          name: "贵州茅台",
-          currentPrice: 2180.50,
-          priceChangePercent: 2.10,
-          volume: 45000000,
-          volumeRatio: 0.8,
-          capitalFlow: 12000000,
-          capitalFlowPercent: 10.0,
-        },
-      ];
-
-      setStocks(mockData);
+      // 根据板块名称获取对应的个股数据
+      const sectorData = getSectorStocks(sector || "");
+      setStocks(sectorData as SectorStock[]);
     } catch (error) {
       console.error("Failed to load sector stocks:", error);
+      setStocks([]);
     } finally {
       setIsLoading(false);
     }
@@ -150,6 +96,10 @@ export default function SectorDetail() {
     setLocation(`/stock/${code}`);
   };
 
+  const handleBack = () => {
+    setLocation("/");
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -158,7 +108,7 @@ export default function SectorDetail() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/market-overview")}
+            onClick={handleBack}
             className="h-8 w-8 p-0"
           >
             <ChevronLeft className="w-4 h-4" />
