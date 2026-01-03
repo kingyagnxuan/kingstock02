@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, marketInsights, stockRecommendations, aiConversations, aiMessages, uploadedFiles, InsertMarketInsight, InsertStockRecommendation, InsertAIConversation, InsertAIMessage, InsertUploadedFile } from "../drizzle/schema";
+import { InsertUser, users, marketInsights, stockRecommendations, aiConversations, aiMessages, uploadedFiles, researchReports, reportRecommendations, InsertMarketInsight, InsertStockRecommendation, InsertAIConversation, InsertAIMessage, InsertUploadedFile, InsertResearchReport, InsertReportRecommendation } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
