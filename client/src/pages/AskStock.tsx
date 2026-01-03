@@ -8,6 +8,7 @@ import { Send, Plus, Download, FileText, Loader2, Paperclip, Mic } from "lucide-
 import { toast } from "sonner";
 import { useState, useRef, useEffect } from "react";
 import { FileList } from "@/components/FileList";
+import { MessageActions } from "@/components/MessageActions";
 
 export default function AskStock() {
   const { user, isAuthenticated } = useAuth();
@@ -297,6 +298,75 @@ export default function AskStock() {
     }
   };
 
+  // 重新生成消息
+  const handleRegenerateMessage = async (messageId: number) => {
+    const message = messages.find((m) => m.id === messageId);
+    if (!message || message.role !== "assistant") return;
+
+    const messageIndex = messages.findIndex((m) => m.id === messageId);
+    if (messageIndex <= 0) return;
+
+    const userMessage = messages[messageIndex - 1];
+    if (userMessage.role !== "user") return;
+
+    setIsLoading(true);
+    try {
+      const response = await sendMessageMutation.mutateAsync({
+        conversationId: currentConversationId!,
+        message: userMessage.content,
+      });
+
+      setMessages(
+        messages.map((m) =>
+          m.id === messageId
+            ? { ...m, content: response.content }
+            : m
+        )
+      );
+      toast.success("已重新生成");
+    } catch (error) {
+      toast.error("重新生成失败");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 编辑用户消息
+  const handleEditMessage = (messageId: number) => {
+    const message = messages.find((m) => m.id === messageId);
+    if (!message || message.role !== "user") return;
+    setInputValue(message.content);
+    setMessages(messages.filter((m) => m.id !== messageId));
+  };
+
+  // 删除消息
+  const handleDeleteMessage = (messageId: number) => {
+    setMessages(messages.filter((m) => m.id !== messageId));
+    toast.success("已删除");
+  };
+
+  // 分享消息
+  const handleShareMessage = (messageId: number, content: string) => {
+    const message = messages.find((m) => m.id === messageId);
+    if (!message) return;
+
+    const shareText = `${message.role === "user" ? "我的提问" : "AI分析"}: ${content}`;
+    if (navigator.share) {
+      navigator.share({
+        title: "问票分享",
+        text: shareText,
+      });
+    } else {
+      navigator.clipboard.writeText(shareText);
+      toast.success("分享内容已复制");
+    }
+  };
+
+  // 消息反馈
+  const handleMessageFeedback = (messageId: number, type: "like" | "dislike" | null) => {
+    console.log(`Message ${messageId} feedback: ${type}`);
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -382,23 +452,35 @@ export default function AskStock() {
                 messages.map((msg) => (
                   <div
                     key={msg.id}
-                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} group`}
                   >
-                    <Card
-                      className={`max-w-2xl ${
-                        msg.role === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                      }`}
-                    >
-                      <CardContent className="p-4">
-                        {msg.role === "assistant" ? (
-                          <Streamdown>{msg.content}</Streamdown>
-                        ) : (
-                          <p>{msg.content}</p>
-                        )}
-                      </CardContent>
-                    </Card>
+                    <div className="flex flex-col gap-2">
+                      <Card
+                        className={`max-w-2xl ${
+                          msg.role === "user"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted"
+                        }`}
+                      >
+                        <CardContent className="p-4">
+                          {msg.role === "assistant" ? (
+                            <Streamdown>{msg.content}</Streamdown>
+                          ) : (
+                            <p>{msg.content}</p>
+                          )}
+                        </CardContent>
+                      </Card>
+                      <MessageActions
+                        messageId={msg.id}
+                        content={msg.content}
+                        role={msg.role}
+                        onRegenerate={msg.role === "assistant" ? () => handleRegenerateMessage(msg.id) : undefined}
+                        onEdit={msg.role === "user" ? () => handleEditMessage(msg.id) : undefined}
+                        onDelete={msg.role === "user" ? () => handleDeleteMessage(msg.id) : undefined}
+                        onShare={() => handleShareMessage(msg.id, msg.content)}
+                        onFeedback={(type) => handleMessageFeedback(msg.id, type)}
+                      />
+                    </div>
                   </div>
                 ))
               )}
