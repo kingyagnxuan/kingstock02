@@ -10,11 +10,56 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 export default function ResearchReports() {
-  const reports = getLatestReports(10);
-  const [selectedReport, setSelectedReport] = useState<ResearchReport | null>(reports[0] || null);
+  const initialReports = getLatestReports(10);
+  const [reports, setReports] = useState<ResearchReport[]>(initialReports);
+  const [selectedReport, setSelectedReport] = useState<ResearchReport | null>(initialReports[0] || null);
   const [showGenerateForm, setShowGenerateForm] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGenerateReport = async () => {
+    if (!keyword.trim()) {
+      toast.error("请输入关键词");
+      return;
+    }
+    setIsGenerating(true);
+    setTimeout(() => {
+      // 生成新的研报
+      const newReport: ResearchReport = {
+        id: `custom_${Date.now()}`,
+        title: `${keyword}行业深度分析报告`,
+        category: "行业研究",
+        author: "AI分析师",
+        date: new Date().toLocaleDateString('zh-CN'),
+        content: `关于${keyword}的深度研究报告\n\n本报告通过对${keyword}行业的深入分析，为投资者提供专业的投资建议。\n\n一、行业概况\n${keyword}行业作为当前市场的热点领域，具有广阔的发展前景。\n\n二、市场分析\n通过对市场数据的分析，我们发现${keyword}行业正处于快速增长阶段。\n\n三、投资建议\n基于以上分析，我们对${keyword}行业的相关上市公司给出如下建议...`,
+        keyPoints: [
+          `${keyword}行业处于快速增长阶段`,
+          "市场需求持续扩大",
+          "政策支持力度加大",
+          "龙头企业优势明显"
+        ],
+        marketOutlook: `${keyword}行业前景看好，预计未来12个月将保持高速增长`,
+        stocks: [
+          { code: "000001", name: "平安银行", currentPrice: 10.5, targetPrice: 12.0, rating: "买入" },
+          { code: "600000", name: "浦发银行", currentPrice: 8.2, targetPrice: 9.5, rating: "增持" }
+        ],
+        riskFactors: [
+          "政策变化风险",
+          "市场竞争加剧",
+          "经济周期风险"
+        ]
+      };
+
+      // 将新报告添加到列表顶部
+      const updatedReports = [newReport, ...reports];
+      setReports(updatedReports);
+      setSelectedReport(newReport);
+      setIsGenerating(false);
+      toast.success(`已生成关于"${keyword}"的研究报告`);
+      setShowGenerateForm(false);
+      setKeyword("");
+    }, 2000);
+  };
 
   return (
     <DashboardLayout>
@@ -56,19 +101,7 @@ export default function ResearchReports() {
                     disabled={isGenerating}
                   />
                   <Button
-                    onClick={async () => {
-                      if (!keyword.trim()) {
-                        toast.error("请输入关键词");
-                        return;
-                      }
-                      setIsGenerating(true);
-                      setTimeout(() => {
-                        setIsGenerating(false);
-                        toast.success(`已生成关于"${keyword}"的研究报告`);
-                        setShowGenerateForm(false);
-                        setKeyword("");
-                      }, 2000);
-                    }}
+                    onClick={handleGenerateReport}
                     disabled={isGenerating}
                   >
                     {isGenerating ? (
