@@ -214,7 +214,7 @@ export default function StrategyDetail() {
               </CardHeader>
               <CardContent>
                 <div className="text-center">
-                  <p className="text-4xl font-bold text-primary mb-2">#{ranking.rank}</p>
+                  <p className="text-4xl font-bold text-primary mb-2">{ranking.rank}</p>
                   <p className="text-sm text-muted-foreground">在所有策略中</p>
                 </div>
               </CardContent>
