@@ -89,3 +89,37 @@
 - [x] 支持播报速度调整
 - [x] 集成到MessageActions组件
 - [x] 测试语音播报功能
+
+
+## 第十阶段：市场概览卡片背景优化
+- [x] 优化MarketIndexCard的背景色设计
+- [x] 消除生硬的色块差异
+- [x] 实现平滑的渐变过渡
+
+
+## 第十一阶段：问票对话框消息样式优化
+- [x] 优化对话消息显示风格
+- [x] 参考Manus对话设计
+- [x] 消除用户消息和AI回复的色块差异
+
+
+## 第十二阶段：智能涨停潜力股追踪系统（进行中）
+- [x] 设计涨停潜力股分析引擎架构
+- [x] 实现当日涨停潜力股分析（盘中5分钟更新）
+  - [x] 数据库schema设计（dailyLimitUpPotentials表）
+  - [x] 后端API实现（getDailyPotentials、saveDailyAnalysis）
+  - [x] 前端页面实现（DailyLimitUp.tsx）
+  - [x] 多维度排序和统计功能
+  - [x] 单元测试（11个测试全部通过）
+- [x] 实现次日涨停潜力股分析（收盘后更新）
+  - [x] 数据库schema设计（nextDayLimitUpPotentials表）
+  - [x] 后端API实现（getNextDayPotentials、saveNextDayAnalysis）
+  - [x] 前端页面实现（NextDayLimitUp.tsx）
+  - [x] 基本面和情绪评分展示
+  - [x] 单元测试（11个测试全部通过）
+- [x] 设计多因素综合评分模型（成交量、资金流、涨速、情绪、热点等）
+- [x] 路由配置和菜单集成
+- [ ] 实现定时任务系统（5分钟和收盘后）
+- [ ] 实现真实数据接入和分析
+- [ ] 优化首页涨停潜力股板块显示
+- [ ] 测试和优化整体系统

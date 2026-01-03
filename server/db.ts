@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, marketInsights, stockRecommendations, aiConversations, aiMessages, uploadedFiles, InsertMarketInsight, InsertStockRecommendation, InsertAIConversation, InsertAIMessage, InsertUploadedFile } from "../drizzle/schema";
+import { InsertUser, users, marketInsights, stockRecommendations, aiConversations, aiMessages, uploadedFiles, InsertMarketInsight, InsertStockRecommendation, InsertAIConversation, InsertAIMessage, InsertUploadedFile, dailyLimitUpPotentials, nextDayLimitUpPotentials, InsertDailyLimitUpPotential, InsertNextDayLimitUpPotential } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -15,7 +15,7 @@ export async function getDb() {
       _db = null;
     }
   }
-  return _db;
+  return _db as any;
 }
 
 export async function upsertUser(user: InsertUser): Promise<void> {

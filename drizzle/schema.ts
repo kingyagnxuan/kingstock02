@@ -105,3 +105,52 @@ export const uploadedFiles = mysqlTable("uploadedFiles", {
 
 export type UploadedFile = typeof uploadedFiles.$inferSelect;
 export type InsertUploadedFile = typeof uploadedFiles.$inferInsert;
+
+// 当日涨停潜力股表
+export const dailyLimitUpPotentials = mysqlTable("dailyLimitUpPotentials", {
+  id: int("id").autoincrement().primaryKey(),
+  stockCode: varchar("stockCode", { length: 10 }).notNull(),
+  stockName: varchar("stockName", { length: 100 }).notNull(),
+  currentPrice: varchar("currentPrice", { length: 20 }).notNull(),
+  priceChangePercent: varchar("priceChangePercent", { length: 20 }).notNull(),
+  volume: varchar("volume", { length: 50 }).notNull(), // 成交量
+  volumeRatio: varchar("volumeRatio", { length: 20 }).notNull(), // 量比
+  netMoneyFlow: varchar("netMoneyFlow", { length: 50 }).notNull(), // 资金净流入
+  moneyFlowPercent: varchar("moneyFlowPercent", { length: 20 }).notNull(), // 资金流入占比
+  riseSpeed: varchar("riseSpeed", { length: 20 }).notNull(), // 涨速
+  marketSentiment: varchar("marketSentiment", { length: 50 }).notNull(), // 市场情绪：极度看好、看好、中性、看空
+  industryHotness: varchar("industryHotness", { length: 50 }).notNull(), // 行业热度：极热、热、温、冷
+  technicalSignal: varchar("technicalSignal", { length: 50 }).notNull(), // 技术信号：强势、中性、弱势
+  limitUpProbability: varchar("limitUpProbability", { length: 20 }).notNull(), // 涨停概率 0-100
+  analysisReason: text("analysisReason").notNull(), // 分析原因
+  updateTime: timestamp("updateTime").defaultNow().onUpdateNow().notNull(),
+  tradingDate: varchar("tradingDate", { length: 10 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DailyLimitUpPotential = typeof dailyLimitUpPotentials.$inferSelect;
+export type InsertDailyLimitUpPotential = typeof dailyLimitUpPotentials.$inferInsert;
+
+// 次日涨停潜力股表
+export const nextDayLimitUpPotentials = mysqlTable("nextDayLimitUpPotentials", {
+  id: int("id").autoincrement().primaryKey(),
+  stockCode: varchar("stockCode", { length: 10 }).notNull(),
+  stockName: varchar("stockName", { length: 100 }).notNull(),
+  closingPrice: varchar("closingPrice", { length: 20 }).notNull(),
+  priceChangePercent: varchar("priceChangePercent", { length: 20 }).notNull(),
+  dayVolume: varchar("dayVolume", { length: 50 }).notNull(), // 当日成交量
+  dayNetMoneyFlow: varchar("dayNetMoneyFlow", { length: 50 }).notNull(), // 当日资金净流入
+  technicalTrend: varchar("technicalTrend", { length: 50 }).notNull(), // 技术趋势：上升、横盘、下降
+  fundamentalScore: varchar("fundamentalScore", { length: 20 }).notNull(), // 基本面评分 0-100
+  sentimentScore: varchar("sentimentScore", { length: 20 }).notNull(), // 情绪评分 0-100
+  industryMomentum: varchar("industryMomentum", { length: 50 }).notNull(), // 行业动量：强、中、弱
+  nextDayPotential: varchar("nextDayPotential", { length: 20 }).notNull(), // 次日涨停概率 0-100
+  keyFactors: text("keyFactors").notNull(), // 关键因素（JSON数组）
+  riskFactors: text("riskFactors").notNull(), // 风险因素（JSON数组）
+  analysisReport: text("analysisReport").notNull(), // 详细分析报告
+  tradingDate: varchar("tradingDate", { length: 10 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type NextDayLimitUpPotential = typeof nextDayLimitUpPotentials.$inferSelect;
+export type InsertNextDayLimitUpPotential = typeof nextDayLimitUpPotentials.$inferInsert;

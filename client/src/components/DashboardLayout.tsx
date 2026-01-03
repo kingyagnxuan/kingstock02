@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
-import { Heart, Home, LineChart, BarChart3, Settings, MessageSquare, User, LogOut, Zap, Bell, Search, Moon, Sun, BookOpen } from "lucide-react";
+import { Heart, Home, LineChart, BarChart3, Settings, MessageSquare, User, LogOut, Zap, Bell, Search, Moon, Sun, BookOpen, Flame } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import NotificationCenterAdvanced from "@/components/NotificationCenterAdvanced";
@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { Toaster } from "sonner";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -39,10 +40,10 @@ function ThemeToggleButton() {
 }
 
 function UserMenu() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth() || { user: null, isAuthenticated: false, logout: () => {} };
   const [, setLocation] = useLocation();
 
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated || !user || !user.name) {
     return (
       <Button
         variant="outline"
@@ -61,9 +62,9 @@ function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="w-full justify-start">
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-xs mr-2">
-            {user.avatar}
+            {user.name?.[0] || 'U'}
           </div>
-          <span className="truncate text-xs">{user.username}</span>
+          <span className="truncate text-xs">{user.name || 'User'}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
@@ -93,6 +94,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navItems = [
     { icon: Home, label: "市场概览", href: "/" },
     { icon: LineChart, label: "涨停追踪", href: "/limit-up" },
+    { icon: Flame, label: "当日涨停潜力", href: "/daily-limit-up" },
+    { icon: Flame, label: "次日涨停潜力", href: "/next-day-limit-up" },
     { icon: Heart, label: "自选股", href: "/watchlist" },
     { icon: BarChart3, label: "AI准确率", href: "/analytics" },
     { icon: Zap, label: "投资策略", href: "/strategy" },

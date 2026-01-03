@@ -66,7 +66,7 @@ export const aiRouter = router({
     .mutation(async ({ input, ctx }) => {
       // 验证对话所有权
       const conversations = await getUserConversations(ctx.user!.id);
-      const conversation = conversations.find((c) => c.id === input.conversationId);
+      const conversation = conversations.find((c: any) => c.id === input.conversationId);
       if (!conversation) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -91,7 +91,7 @@ export const aiRouter = router({
           role: "system" as const,
           content: conversation.systemPrompt || "",
         },
-        ...messages.map((m) => ({
+        ...messages.map((m: any) => ({
           role: m.role as "user" | "assistant" | "system",
           content: m.content,
         })),
@@ -138,7 +138,7 @@ export const aiRouter = router({
     .query(async ({ input, ctx }) => {
       // 验证对话所有权
       const conversations = await getUserConversations(ctx.user!.id);
-      const conversation = conversations.find((c) => c.id === input.conversationId);
+      const conversation = conversations.find((c: any) => c.id === input.conversationId);
       if (!conversation) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -147,7 +147,7 @@ export const aiRouter = router({
       }
 
       const messages = await getConversationMessages(input.conversationId);
-      return messages.map((m) => ({
+      return messages.map((m: any) => ({
         ...m,
         metadata: m.metadata ? JSON.parse(m.metadata) : undefined,
       }));
@@ -159,7 +159,7 @@ export const aiRouter = router({
     .query(async ({ input, ctx }) => {
       // 验证对话所有权
       const conversations = await getUserConversations(ctx.user!.id);
-      const conversation = conversations.find((c) => c.id === input.conversationId);
+      const conversation = conversations.find((c: any) => c.id === input.conversationId);
       if (!conversation) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -177,7 +177,7 @@ export const aiRouter = router({
         "",
         "对话内容:",
         "---",
-        ...messages.map((m) => {
+        ...messages.map((m: any) => {
           const role = m.role === "user" ? "用户" : m.role === "assistant" ? "AI分析师" : "系统";
           return `[${role}]: ${m.content}`;
         }),
@@ -195,7 +195,7 @@ export const aiRouter = router({
     .mutation(async ({ input, ctx }) => {
       // 验证对话所有权
       const conversations = await getUserConversations(ctx.user!.id);
-      const conversation = conversations.find((c) => c.id === input.conversationId);
+      const conversation = conversations.find((c: any) => c.id === input.conversationId);
       if (!conversation) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -214,7 +214,7 @@ export const aiRouter = router({
 5. 后续关注点
 
 对话内容：
-${messages.map((m) => `${m.role === "user" ? "用户" : "AI分析师"}: ${m.content}`).join("\n")}`;
+${messages.map((m: any) => `${m.role === "user" ? "用户" : "AI分析师"}: ${m.content}`).join("\n")}`;
 
       try {
         const response = await invokeLLM({

@@ -1,0 +1,42 @@
+CREATE TABLE `dailyLimitUpPotentials` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`stockCode` varchar(10) NOT NULL,
+	`stockName` varchar(100) NOT NULL,
+	`currentPrice` varchar(20) NOT NULL,
+	`priceChangePercent` varchar(20) NOT NULL,
+	`volume` varchar(50) NOT NULL,
+	`volumeRatio` varchar(20) NOT NULL,
+	`netMoneyFlow` varchar(50) NOT NULL,
+	`moneyFlowPercent` varchar(20) NOT NULL,
+	`riseSpeed` varchar(20) NOT NULL,
+	`marketSentiment` varchar(50) NOT NULL,
+	`industryHotness` varchar(50) NOT NULL,
+	`technicalSignal` varchar(50) NOT NULL,
+	`limitUpProbability` varchar(20) NOT NULL,
+	`analysisReason` text NOT NULL,
+	`updateTime` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	`tradingDate` varchar(10) NOT NULL,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	CONSTRAINT `dailyLimitUpPotentials_id` PRIMARY KEY(`id`)
+);
+--> statement-breakpoint
+CREATE TABLE `nextDayLimitUpPotentials` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`stockCode` varchar(10) NOT NULL,
+	`stockName` varchar(100) NOT NULL,
+	`closingPrice` varchar(20) NOT NULL,
+	`priceChangePercent` varchar(20) NOT NULL,
+	`dayVolume` varchar(50) NOT NULL,
+	`dayNetMoneyFlow` varchar(50) NOT NULL,
+	`technicalTrend` varchar(50) NOT NULL,
+	`fundamentalScore` varchar(20) NOT NULL,
+	`sentimentScore` varchar(20) NOT NULL,
+	`industryMomentum` varchar(50) NOT NULL,
+	`nextDayPotential` varchar(20) NOT NULL,
+	`keyFactors` text NOT NULL,
+	`riskFactors` text NOT NULL,
+	`analysisReport` text NOT NULL,
+	`tradingDate` varchar(10) NOT NULL,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	CONSTRAINT `nextDayLimitUpPotentials_id` PRIMARY KEY(`id`)
+);

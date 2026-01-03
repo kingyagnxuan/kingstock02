@@ -36,6 +36,13 @@
       "when": 1767415159183,
       "tag": "0004_volatile_firebrand",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1767416141620,
+      "tag": "0005_clumsy_turbo",
+      "breakpoints": true
     }
   ]
 }

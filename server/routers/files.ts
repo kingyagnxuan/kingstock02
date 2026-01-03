@@ -13,7 +13,7 @@ export const filesRouter = router({
     .input(z.object({ conversationId: z.number() }))
     .query(async ({ input }) => {
       const files = await getConversationFiles(input.conversationId);
-      return files.map((f) => ({
+      return files.map((f: any) => ({
         ...f,
         analysisResult: f.analysisResult ? JSON.parse(f.analysisResult) : undefined,
       }));
