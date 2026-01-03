@@ -1,28 +1,90 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { getLatestReports, getReportById, ResearchReport } from "@/lib/mockResearchReports";
-import { BookOpen, TrendingUp, AlertCircle, Target } from "lucide-react";
+import { BookOpen, TrendingUp, AlertCircle, Target, MessageCircle, Share2, Plus, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 export default function ResearchReports() {
   const reports = getLatestReports(10);
   const [selectedReport, setSelectedReport] = useState<ResearchReport | null>(reports[0] || null);
+  const [showGenerateForm, setShowGenerateForm] = useState(false);
+  const [keyword, setKeyword] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
   return (
     <DashboardLayout>
       <div className="space-y-8">
         <section className="space-y-4">
-          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-primary" />
-            深度研究报告
-          </h2>
-          <p className="text-muted-foreground">
-            专业的市场分析、行业研究和投资建议，帮助您把握投资机会
-          </p>
+          <div className="flex items-center justify-between">
+            <div className="space-y-2 flex-1">
+              <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                <BookOpen className="w-6 h-6 text-primary" />
+                深度研究报告
+              </h2>
+              <p className="text-muted-foreground">
+                专业的市场分析、行业研究和投资建议，帮助您把握投资机会
+              </p>
+            </div>
+            <Button
+              onClick={() => setShowGenerateForm(!showGenerateForm)}
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              生成研报
+            </Button>
+          </div>
         </section>
+
+        {showGenerateForm && (
+          <Card className="bg-primary/5 border-primary/30">
+            <CardHeader>
+              <CardTitle className="text-lg">生成定制化研究报告</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">研报关键词</label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="输入行业、公司或投资主题"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    disabled={isGenerating}
+                  />
+                  <Button
+                    onClick={async () => {
+                      if (!keyword.trim()) {
+                        toast.error("请输入关键词");
+                        return;
+                      }
+                      setIsGenerating(true);
+                      setTimeout(() => {
+                        setIsGenerating(false);
+                        toast.success(`已生成关于"${keyword}"的研究报告`);
+                        setShowGenerateForm(false);
+                        setKeyword("");
+                      }, 2000);
+                    }}
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        生成中...
+                      </>
+                    ) : (
+                      "生成"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Reports List */}
@@ -162,13 +224,38 @@ export default function ResearchReports() {
                     </TabsContent>
                   </Tabs>
 
-                  <div className="flex gap-3 pt-4 border-t border-border/50">
-                    <Button className="flex-1" variant="default">
+                  <div className="flex gap-3 pt-4 border-t border-border/50 flex-wrap">
+                    <Button className="flex-1 min-w-[120px]" variant="default">
                       <Target className="w-4 h-4 mr-2" />
                       设置提醒
                     </Button>
-                    <Button className="flex-1" variant="outline">
-                      分享报告
+                    <Button
+                      className="flex-1 min-w-[120px]"
+                      variant="outline"
+                      onClick={() => {
+                        if (navigator.share) {
+                          navigator.share({
+                            title: selectedReport.title,
+                            text: `查看我在StockTracker上发现的研究报告：${selectedReport.title}`,
+                            url: window.location.href,
+                          });
+                        } else {
+                          toast.success("已复制分享链接，可分享到微信朋友圈");
+                        }
+                      }}
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      分享到微信
+                    </Button>
+                    <Button
+                      className="flex-1 min-w-[120px]"
+                      variant="outline"
+                      onClick={() => {
+                        toast.success("已生成朋友圈分享卡片");
+                      }}
+                    >
+                      <Share2 className="w-4 h-4 mr-2" />
+                      朋友圈
                     </Button>
                   </div>
                 </CardContent>

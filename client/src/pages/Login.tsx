@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 import { useState } from "react";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, QrCode, Smartphone } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Login() {
@@ -129,6 +129,34 @@ export default function Login() {
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-card text-muted-foreground">或</span>
             </div>
+          </div>
+
+          {/* 微信登录选项 */}
+          <div className="space-y-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-green-500/30 hover:bg-green-500/5"
+              onClick={() => {
+                // 微信扫码登录逻辑
+                window.location.href = `${import.meta.env.VITE_OAUTH_PORTAL_URL}?client_id=${import.meta.env.VITE_APP_ID}&redirect_uri=${window.location.origin}/auth/wechat&response_type=code&scope=snsapi_login&state=wechat_scan`;
+              }}
+            >
+              <QrCode className="w-4 h-4 mr-2 text-green-500" />
+              <span className="text-green-600">微信扫码登录</span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-green-500/30 hover:bg-green-500/5"
+              onClick={() => {
+                // 微信一键登录逻辑
+                window.location.href = `${import.meta.env.VITE_OAUTH_PORTAL_URL}?client_id=${import.meta.env.VITE_APP_ID}&redirect_uri=${window.location.origin}/auth/wechat&response_type=code&scope=snsapi_userinfo&state=wechat_quick`;
+              }}
+            >
+              <Smartphone className="w-4 h-4 mr-2 text-green-500" />
+              <span className="text-green-600">微信一键登录</span>
+            </Button>
           </div>
 
           <div className="space-y-2">
