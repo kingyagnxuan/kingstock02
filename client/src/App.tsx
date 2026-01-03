@@ -30,6 +30,8 @@ import DailyLimitUp from "./pages/DailyLimitUp";
 import NextDayLimitUp from "./pages/NextDayLimitUp";
 import SectorDetail from "./pages/SectorDetail";
 import StrategyDetail from "./pages/StrategyDetail";
+import DiscussionDetail from "./pages/DiscussionDetail";
+import NewsDetail from "./pages/NewsDetail";
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -43,9 +45,9 @@ function Router() {
       <Route path={"/profile"} component={UserProfile} />
       <Route path={"/search"} component={Search} />
       <Route path={"/strategy"} component={StrategyManagement} />
-      <Route path={"strategy-ranking"} component={StrategyRanking} />
-      <Route path={"strategy-detail/:id"} component={StrategyDetail} />
-      <Route path={"automated-trading"} component={AutomatedTrading} />
+      <Route path={"/strategy-ranking"} component={StrategyRanking} />
+      <Route path={"/strategy-detail/:id"} component={StrategyDetail} />
+      <Route path={"/automated-trading"} component={AutomatedTrading} />
       <Route path={"/notification-settings"} component={NotificationSettings} />
       <Route path={"/stock-detail"} component={StockDetail} />
       <Route path={"/stock/:code"} component={StockDetail} />
@@ -56,6 +58,8 @@ function Router() {
       <Route path={"/daily-limit-up"} component={DailyLimitUp} />
       <Route path={"/next-day-limit-up"} component={NextDayLimitUp} />
       <Route path={"/sector/:sector"} component={SectorDetail} />
+      <Route path={"/discussion/:id"} component={DiscussionDetail} />
+      <Route path={"/news/:id"} component={NewsDetail} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

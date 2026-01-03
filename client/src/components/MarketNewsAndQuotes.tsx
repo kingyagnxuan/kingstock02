@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MarketNews } from "@/lib/communityTypes";
 import { Newspaper, TrendingUp, AlertCircle } from "lucide-react";
+import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 
 interface MarketNewsAndQuotesProps {
@@ -9,6 +10,7 @@ interface MarketNewsAndQuotesProps {
 }
 
 export default function MarketNewsAndQuotes({ news }: MarketNewsAndQuotesProps) {
+  const [, setLocation] = useLocation();
   const getImportanceColor = (importance: string) => {
     switch (importance) {
       case "high":
@@ -66,6 +68,7 @@ export default function MarketNewsAndQuotes({ news }: MarketNewsAndQuotesProps) 
                   "p-4 hover:bg-muted/30 transition-colors cursor-pointer border-b border-border/50 last:border-b-0",
                   "group"
                 )}
+                onClick={() => setLocation(`/news/${item.id}`)}
               >
                 <div className="flex gap-3">
                   {/* Importance Indicator */}

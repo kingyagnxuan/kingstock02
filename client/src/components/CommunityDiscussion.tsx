@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { DiscussionThread, DiscussionReply } from "@/lib/communityTypes";
 import { Heart, MessageCircle, Eye, Search } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 
 interface CommunityDiscussionProps {
@@ -16,6 +17,7 @@ export default function CommunityDiscussion({
   threads,
   replies = {},
 }: CommunityDiscussionProps) {
+  const [, setLocation] = useLocation();
   const [selectedThread, setSelectedThread] = useState<DiscussionThread | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -104,7 +106,7 @@ export default function CommunityDiscussion({
                 <Card
                   key={thread.id}
                   className="bg-card/40 backdrop-blur-md border-border/50 hover:border-primary/50 transition-all cursor-pointer group"
-                  onClick={() => setSelectedThread(thread)}
+                  onClick={() => setLocation(`/discussion/${thread.id}`)}
                 >
                   <CardContent className="p-4">
                     <div className="flex gap-4">
