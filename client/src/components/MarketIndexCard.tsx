@@ -11,14 +11,14 @@ export default function MarketIndexCard({ index }: MarketIndexCardProps) {
   const isUp = index.change >= 0;
 
   return (
-    <Card className="bg-gradient-to-br from-card/60 to-card/30 backdrop-blur-md border-border/50 hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
+    <Card className="bg-card/50 backdrop-blur-md border-border/50 hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
       <div className={cn(
         "absolute top-0 left-0 w-1 h-full transition-all duration-300 opacity-80",
         isUp ? "bg-[var(--chart-1)]" : "bg-[var(--chart-2)]",
         "group-hover:w-1.5 group-hover:opacity-100"
       )} />
       
-      <CardContent className="p-5 pl-7 bg-gradient-to-br from-transparent to-muted/5">
+      <CardContent className="p-5 pl-7 bg-gradient-to-br from-transparent via-transparent to-transparent">
         <div className="flex justify-between items-start mb-2">
           <div>
             <h3 className="text-sm font-medium text-muted-foreground">{index.name}</h3>
