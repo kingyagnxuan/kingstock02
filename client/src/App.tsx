@@ -42,6 +42,7 @@ function Router() {
       <Route path={"/automated-trading"} component={AutomatedTrading} />
       <Route path={"/notification-settings"} component={NotificationSettings} />
       <Route path={"/stock-detail"} component={StockDetail} />
+      <Route path={"/stock/:code"} component={StockDetail} />
       <Route path={"/stock-search"} component={StockSearch} />
       <Route path={"/settings"} component={Settings} />
       <Route path={"/research-reports"} component={ResearchReports} />

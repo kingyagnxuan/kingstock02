@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, TrendingUp, TrendingDown, BarChart3, PieChart, Newspaper, Loader2 } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as PieChartComponent, Pie, Cell } from "recharts";
 import { useWatchlist } from "@/contexts/WatchlistContext";
+import { getSinaStockInfo } from "@/lib/sinaFinanceAPI";
 import {
   getMockStockDetail,
   getMockCashFlow,
@@ -20,18 +21,17 @@ import type { KLinePeriod } from "@/lib/stockDetailTypes";
 
 export default function StockDetail() {
   const [location] = useLocation();
-  const code = new URLSearchParams(location).get("code") || "000001";
+  // 从路由参数或查询参数获取股票代码
+  const match = location.match(/\/stock\/([^/?]+)/);
+  const code = match ? match[1] : new URLSearchParams(location).get("code") || "000001";
   const [klinePeriod, setKlinePeriod] = useState<KLinePeriod>("1d");
   const [loading, setLoading] = useState(false);
+  const [realTimeData, setRealTimeData] = useState<any>(null);
   const { watchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
 
   const isInWatchlist = watchlist.some(w => w.code === code);
 
-  // 注：由于CORS限制，外部API无法从浏览器直接调用
-  // 实际应用中应该使用后端代理或付费API
-  // 目前使用模拟数据，保证网站正常运行
-
-  // 加载K线数据
+  // 加载K线数据和实时行情
   useEffect(() => {
     loadKlineData();
   }, [code, klinePeriod]);
@@ -39,17 +39,40 @@ export default function StockDetail() {
   const loadKlineData = async () => {
     setLoading(true);
     try {
+      // 尝试从新浪财经获取实时行情
+      const sinaCode = code.startsWith("sh") || code.startsWith("sz") ? code : `sh${code}`;
+      const realData = await getSinaStockInfo(sinaCode);
+      if (realData) {
+        setRealTimeData(realData);
+        console.log("成功获取新浪财经实时数据:", realData);
+      } else {
+        console.log("新浪财经API返回空数据，使用模拟数据");
+      }
       // 模拟加载延迟
       await new Promise(resolve => setTimeout(resolve, 300));
       setLoading(false);
     } catch (error) {
-      console.error("加载K线数据失败:", error);
+      console.error("加载实时数据失败，使用模拟数据:", error);
       setLoading(false);
     }
   };
 
-  // 使用模拟数据
-  const detail = getMockStockDetail(code);
+  // 使用实时数据或模拟数据
+  let detail = getMockStockDetail(code);
+  if (realTimeData) {
+    detail = {
+      ...detail,
+      price: realTimeData.price,
+      change: realTimeData.bid,
+      changePercent: realTimeData.percent,
+      volume: realTimeData.volume,
+      amount: realTimeData.amount,
+      high: realTimeData.high,
+      low: realTimeData.low,
+      open: realTimeData.open
+    };
+  }
+
   const cashFlow = getMockCashFlow(code);
   const fundFlow = getMockFundFlow(code);
   const technicalIndicators = getMockTechnicalIndicators(code);
@@ -290,31 +313,38 @@ export default function StockDetail() {
           {/* 技术指标 */}
           <TabsContent value="technical" className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
-              {Array.isArray(technicalIndicators) ? technicalIndicators.map((indicator: any, index: number) => (
-                <Card key={index} className="bg-card/40 backdrop-blur-md border-border/50">
-                  <CardContent className="p-4">
-                    <p className="text-sm text-muted-foreground">{indicator.name}</p>
-                    <p className="text-2xl font-bold mt-2">{indicator.value.toFixed(2)}</p>
-                    <p className={`text-sm mt-2 ${indicator.signal === "buy" ? "text-green-500" : indicator.signal === "sell" ? "text-red-500" : "text-yellow-500"}`}>
-                      {indicator.signal === "buy" ? "买入信号" : indicator.signal === "sell" ? "卖出信号" : "中性"}
-                    </p>
-                  </CardContent>
-                </Card>
-              )) : null}
+              <Card className="bg-card/40 backdrop-blur-md border-border/50">
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground">MA5</p>
+                  <p className="text-lg font-bold mt-2">{technicalIndicators.ma5.toFixed(2)}</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-card/40 backdrop-blur-md border-border/50">
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground">RSI</p>
+                  <p className="text-lg font-bold mt-2">{technicalIndicators.rsi.toFixed(2)}</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-card/40 backdrop-blur-md border-border/50">
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground">MACD</p>
+                  <p className="text-lg font-bold mt-2">{technicalIndicators.macd.histogram.toFixed(2)}</p>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
           {/* 新闻 */}
           <TabsContent value="news" className="space-y-4">
             {news.map((item: any, index: number) => (
-              <Card key={index} className="bg-card/40 backdrop-blur-md border-border/50">
+              <Card key={index} className="bg-card/40 backdrop-blur-md border-border/50 hover:border-primary/50 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
                     <Newspaper className="w-5 h-5 mt-1 text-primary flex-shrink-0" />
                     <div className="flex-1">
-                      <p className="font-medium">{item.title}</p>
-                      <p className="text-sm text-muted-foreground mt-1">{item.content}</p>
-                      <p className="text-xs text-muted-foreground mt-2">{item.publishTime || "未知时间"}</p>
+                      <h3 className="font-semibold">{item.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">{item.summary}</p>
+                      <p className="text-xs text-muted-foreground mt-2">{item.date}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -326,15 +356,32 @@ export default function StockDetail() {
           <TabsContent value="analysis" className="space-y-4">
             <Card className="bg-card/40 backdrop-blur-md border-border/50">
               <CardHeader className="border-b border-border/50 pb-4">
-                <CardTitle>分析观点</CardTitle>
+                <CardTitle>机构评级</CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium">评级: {getRatingLabel(analysis.rating)}</p>
-                    <p className="text-sm text-muted-foreground mt-2">{(analysis as any).opinion || "暂无分析意见"}</p>
-                  </div>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">综合评级</span>
+                  <span className={`font-semibold ${getRatingColor(analysis.rating)}`}>
+                    {getRatingLabel(analysis.rating)}
+                  </span>
                 </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">分析师数量</span>
+                  <span className="font-semibold">{analysis.analystCount}位</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">目标价</span>
+                  <span className="font-semibold">{analysis.targetPrice.toFixed(2)}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/40 backdrop-blur-md border-border/50">
+              <CardHeader className="border-b border-border/50 pb-4">
+                <CardTitle>分析师观点</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <p className="text-sm leading-relaxed">{analysis.consensus}</p>
               </CardContent>
             </Card>
           </TabsContent>

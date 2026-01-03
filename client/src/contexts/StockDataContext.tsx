@@ -1,6 +1,7 @@
-import { mockHotSectors, mockIndices, mockLimitUpStocks, mockReport } from "@/lib/mockData";
 import { AnalysisReport, HotSector, MarketIndex, Stock } from "@/lib/types";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { getSinaIndices, getCachedSinaQuote } from "@/lib/sinaFinanceAPI";
+import { mockIndices, mockHotSectors, mockLimitUpStocks, mockReport } from "@/lib/mockData";
 
 interface StockDataContextType {
   indices: MarketIndex[];
@@ -22,37 +23,70 @@ export function StockDataProvider({ children }: { children: React.ReactNode }) {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Simulate real-time data updates
-  const refreshData = () => {
+  // 使用新浪财经API获取实时数据
+  const refreshData = async () => {
     setIsLoading(true);
-    
-    // Simulate API latency
-    setTimeout(() => {
-      // Randomize data slightly to simulate market fluctuations
+    try {
+      // 获取指数数据
+      const sinaIndices = await getSinaIndices();
+      if (sinaIndices.length > 0) {
+        const updatedIndices = indices.map(idx => {
+          const sinaData = sinaIndices.find(s => s.code.includes(idx.code));
+          if (sinaData) {
+            return {
+              ...idx,
+              value: sinaData.price,
+              change: sinaData.bid,
+              percent: sinaData.percent
+            };
+          }
+          return idx;
+        });
+        setIndices(updatedIndices);
+      }
+      
+      // 获取涨停股票的实时数据
+      const updatedStocks = await Promise.all(
+        limitUpStocks.map(async (stock) => {
+          const sinaQuote = await getCachedSinaQuote(stock.code);
+          if (sinaQuote) {
+            return {
+              ...stock,
+              price: sinaQuote.price,
+              change: sinaQuote.bid,
+              percent: sinaQuote.percent,
+              volume: sinaQuote.volume
+            };
+          }
+          return stock;
+        })
+      );
+      setLimitUpStocks(updatedStocks);
+      
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error("获取新浪财经数据失败，使用模拟数据:", error);
+      // 降级到模拟数据
       const newIndices = indices.map(idx => ({
         ...idx,
         value: idx.value * (1 + (Math.random() * 0.002 - 0.001)),
         change: idx.change + (Math.random() * 2 - 1)
       }));
-
-      const newStocks = limitUpStocks.map(stock => ({
-        ...stock,
-        price: stock.isLimitUp ? stock.price : stock.price * (1 + (Math.random() * 0.01 - 0.005)),
-        volume: stock.volume + Math.floor(Math.random() * 10000)
-      }));
-
       setIndices(newIndices);
-      setLimitUpStocks(newStocks);
       setLastUpdated(new Date());
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
   };
 
   // Auto-refresh every 5 seconds
   useEffect(() => {
+    // 首次加载时立即刷新
+    refreshData();
+    
     const interval = setInterval(refreshData, 5000);
     return () => clearInterval(interval);
-  }, [indices, limitUpStocks]);
+  }, []);
 
   return (
     <StockDataContext.Provider
