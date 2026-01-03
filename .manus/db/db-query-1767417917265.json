@@ -1,0 +1,31 @@
+{
+  "query": "SELECT stockCode, stockName, currentPrice, priceChangePercent, limitUpProbability FROM dailyLimitUpPotentials ORDER BY limitUpProbability DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user FiA9Fzg4dmMGF5A.root --database SRLUWoyCJWdu4NrFmMUjGU --execute SELECT stockCode, stockName, currentPrice, priceChangePercent, limitUpProbability FROM dailyLimitUpPotentials ORDER BY limitUpProbability DESC LIMIT 5;",
+  "rows": [
+    {
+      "stockCode": "000001",
+      "stockName": "平安银行",
+      "currentPrice": "12.50",
+      "priceChangePercent": "+5.2%",
+      "limitUpProbability": "85.5"
+    },
+    {
+      "stockCode": "000333",
+      "stockName": "美的集团",
+      "currentPrice": "35.80",
+      "priceChangePercent": "+4.5%",
+      "limitUpProbability": "78.9"
+    },
+    {
+      "stockCode": "000002",
+      "stockName": "万科A",
+      "currentPrice": "15.30",
+      "priceChangePercent": "+3.1%",
+      "limitUpProbability": "62.3"
+    }
+  ],
+  "messages": [],
+  "stdout": "stockCode\tstockName\tcurrentPrice\tpriceChangePercent\tlimitUpProbability\n000001\t平安银行\t12.50\t+5.2%\t85.5\n000333\t美的集团\t35.80\t+4.5%\t78.9\n000002\t万科A\t15.30\t+3.1%\t62.3\n",
+  "stderr": "",
+  "execution_time_ms": 80
+}

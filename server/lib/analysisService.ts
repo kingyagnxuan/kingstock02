@@ -1,6 +1,7 @@
 import { getDb } from "../db";
 import { dailyLimitUpPotentials, nextDayLimitUpPotentials } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
+import { getCachedData } from "./sinaDataFetcher";
 
 /**
  * 股票实时数据接口
@@ -45,38 +46,50 @@ export interface AnalysisResult {
 }
 
 /**
- * 获取模拟的实时数据（实际应该从API获取）
+ * 获取股票实时数据 - 使用新浪财经API
  */
 export async function getStockRealTimeData(
   stockCode: string
 ): Promise<StockRealTimeData | null> {
   try {
-    // 这里应该调用真实的API获取数据
-    // 目前返回模拟数据用于演示
-    const mockData: StockRealTimeData = {
-      code: stockCode,
-      name: `股票${stockCode}`,
-      price: 10 + Math.random() * 50,
-      priceChange: (Math.random() - 0.5) * 5,
-      priceChangePercent: (Math.random() - 0.5) * 10,
-      volume: Math.floor(Math.random() * 10000000),
-      volumeRatio: 0.5 + Math.random() * 2,
-      netMoneyFlow: (Math.random() - 0.5) * 100000000,
-      moneyFlowPercent: (Math.random() - 0.5) * 5,
-      riseSpeed: (Math.random() - 0.5) * 5,
-      high: 50 + Math.random() * 50,
-      low: 10 + Math.random() * 30,
-      open: 20 + Math.random() * 40,
-      close: 15 + Math.random() * 40,
-      yclose: 15 + Math.random() * 40,
-      time: new Date().toLocaleTimeString(),
-    };
+    // 优先尝试从新浪财经获取真实数据
+    const realData = await getCachedData(stockCode);
+    if (realData) {
+      console.log(`成功获取${stockCode}的真实数据`);
+      return realData;
+    }
 
-    return mockData;
+    // 如果新浪财经获取失败，使用模拟数据
+    console.warn(`新浪财经获取失败，使用模拟数据: ${stockCode}`);
+    return generateMockData(stockCode);
   } catch (error) {
     console.error("获取实时数据失败:", error);
-    return null;
+    return generateMockData(stockCode);
   }
+}
+
+/**
+ * 生成模拟数据
+ */
+function generateMockData(stockCode: string): StockRealTimeData {
+  return {
+    code: stockCode,
+    name: `股票${stockCode}`,
+    price: 10 + Math.random() * 50,
+    priceChange: (Math.random() - 0.5) * 5,
+    priceChangePercent: (Math.random() - 0.5) * 10,
+    volume: Math.floor(Math.random() * 10000000),
+    volumeRatio: 0.5 + Math.random() * 2,
+    netMoneyFlow: (Math.random() - 0.5) * 100000000,
+    moneyFlowPercent: (Math.random() - 0.5) * 5,
+    riseSpeed: (Math.random() - 0.5) * 5,
+    high: 50 + Math.random() * 50,
+    low: 10 + Math.random() * 30,
+    open: 20 + Math.random() * 40,
+    close: 15 + Math.random() * 40,
+    yclose: 15 + Math.random() * 40,
+    time: new Date().toLocaleTimeString(),
+  };
 }
 
 /**

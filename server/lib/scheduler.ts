@@ -64,8 +64,8 @@ function isAfterMarketClose(): boolean {
 /**
  * 更新当日涨停潜力股
  */
-export async function updateDailyLimitUpPotentials(): Promise<void> {
-  if (!isInTradingHours()) {
+export async function updateDailyLimitUpPotentials(forceUpdate: boolean = false): Promise<void> {
+  if (!forceUpdate && !isInTradingHours()) {
     console.log("不在交易时间内，跳过当日涨停潜力股更新");
     return;
   }
@@ -109,8 +109,8 @@ export async function updateDailyLimitUpPotentials(): Promise<void> {
 /**
  * 更新次日涨停潜力股
  */
-export async function updateNextDayLimitUpPotentials(): Promise<void> {
-  if (!isAfterMarketClose()) {
+export async function updateNextDayLimitUpPotentials(forceUpdate: boolean = false): Promise<void> {
+  if (!forceUpdate && !isAfterMarketClose()) {
     console.log("不在收盘后时间内，跳过次日涨停潜力股更新");
     return;
   }
@@ -188,7 +188,7 @@ export function startScheduler(): () => void {
  */
 export async function manualUpdateAll(): Promise<void> {
   console.log("手动触发全量更新...");
-  await updateDailyLimitUpPotentials();
-  await updateNextDayLimitUpPotentials();
+  await updateDailyLimitUpPotentials(true);
+  await updateNextDayLimitUpPotentials(true);
   console.log("手动更新完成");
 }
