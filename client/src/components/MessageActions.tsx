@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Volume2,
   Copy,
@@ -9,6 +9,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   MoreHorizontal,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +19,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { VoiceSettings } from "@/components/VoiceSettings";
+import {
+  VoiceConfig,
+  DEFAULT_VOICE_CONFIG,
+  speakText,
+  stopSpeech,
+  isSpeaking,
+} from "@/lib/speechUtils";
 
 interface MessageActionsProps {
   messageId: number;
@@ -40,24 +49,31 @@ export function MessageActions({
   onShare,
   onFeedback,
 }: MessageActionsProps) {
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [feedback, setFeedback] = useState<"like" | "dislike" | null>(null);
+  const [voiceConfig, setVoiceConfig] = useState<VoiceConfig>(
+    DEFAULT_VOICE_CONFIG
+  );
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+
+  // 检查播报状态
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsPlayingAudio(isSpeaking());
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
 
   // 语音播报
   const handleSpeak = () => {
-    if ("speechSynthesis" in window) {
-      if (isSpeaking) {
-        window.speechSynthesis.cancel();
-        setIsSpeaking(false);
-      } else {
-        const utterance = new SpeechSynthesisUtterance(content);
-        utterance.lang = "zh-CN";
-        utterance.onend = () => setIsSpeaking(false);
-        window.speechSynthesis.speak(utterance);
-        setIsSpeaking(true);
-      }
+    if (isPlayingAudio) {
+      stopSpeech();
+      setIsPlayingAudio(false);
     } else {
-      toast.error("浏览器不支持语音播报");
+      speakText(content, voiceConfig, () => {
+        setIsPlayingAudio(false);
+      });
+      setIsPlayingAudio(true);
     }
   };
 
@@ -107,9 +123,13 @@ export function MessageActions({
             size="sm"
             className="h-8 w-8 p-0 hover:bg-muted"
             onClick={handleSpeak}
-            title={isSpeaking ? "停止播报" : "语音播报"}
+            title={isPlayingAudio ? "停止播报" : "语音播报"}
           >
-            <Volume2 className={`w-4 h-4 ${isSpeaking ? "text-blue-500" : ""}`} />
+            <Volume2
+              className={`w-4 h-4 ${
+                isPlayingAudio ? "text-blue-500 animate-pulse" : ""
+              }`}
+            />
           </Button>
 
           {/* 复制 */}
@@ -145,7 +165,9 @@ export function MessageActions({
             title="点赞"
           >
             <ThumbsUp
-              className={`w-4 h-4 ${feedback === "like" ? "fill-current text-green-500" : ""}`}
+              className={`w-4 h-4 ${
+                feedback === "like" ? "fill-current text-green-500" : ""
+              }`}
             />
           </Button>
 
@@ -158,7 +180,9 @@ export function MessageActions({
             title="点踩"
           >
             <ThumbsDown
-              className={`w-4 h-4 ${feedback === "dislike" ? "fill-current text-red-500" : ""}`}
+              className={`w-4 h-4 ${
+                feedback === "dislike" ? "fill-current text-red-500" : ""
+              }`}
             />
           </Button>
 
@@ -193,8 +217,20 @@ export function MessageActions({
                 <Edit2 className="w-4 h-4 mr-2" />
                 转为文档编辑
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowVoiceSettings(true)}>
+                <Settings className="w-4 h-4 mr-2" />
+                语音设置
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* 语音设置对话框 */}
+          <VoiceSettings
+            open={showVoiceSettings}
+            onOpenChange={setShowVoiceSettings}
+            config={voiceConfig}
+            onConfigChange={setVoiceConfig}
+          />
         </>
       )}
 
