@@ -1,8 +1,14 @@
 {
   "name": "stock-tracker",
   "version": "1.0.0",
+  "description": "A股涨停潜力股追踪系统 v1.0 - 完整功能版本",
   "type": "module",
   "license": "MIT",
+  "versionInfo": {
+    "release": "1.0.0",
+    "releaseDate": "2026-01-02",
+    "features": ["涨停潜力股追踪", "多LLM问票", "评分因子可视化", "实时行情数据", "定时更新系统"]
+  },
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/_core/index.ts",
     "build": "vite build && esbuild server/_core/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
