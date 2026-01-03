@@ -4,12 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Streamdown } from "streamdown";
-import { Send, Plus, Download, FileText, Loader2, Paperclip, Mic } from "lucide-react";
+import { Send, Plus, Download, FileText, Loader2, Paperclip, Mic, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useRef, useEffect } from "react";
 import { FileList } from "@/components/FileList";
 import { MessageActions } from "@/components/MessageActions";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { selectBestModels } from "@/lib/aiModelSelector";
 
 export default function AskStock() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -22,6 +23,7 @@ export default function AskStock() {
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
   const [availableModels, setAvailableModels] = useState<any[]>([]);
+  const [useAutoModel, setUseAutoModel] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
@@ -161,10 +163,21 @@ export default function AskStock() {
     setIsLoading(true);
 
     try {
+      let modelToUse = selectedModel;
+      
+      if (useAutoModel) {
+        const selection = selectBestModels(userMessage);
+        modelToUse = selection.models[0];
+        
+        if (selection.shouldSynthesize) {
+          toast.info(`🤖 ${selection.description}`);
+        }
+      }
+      
       const response = await sendMessageMutation.mutateAsync({
         conversationId: currentConversationId,
         message: userMessage,
-        model: selectedModel,
+        model: modelToUse,
       });
 
       setMessages([
@@ -415,21 +428,39 @@ export default function AskStock() {
             新对话
           </Button>
 
-          {/* LLM模型选择器 */}
+          {/* 自动模型选择开关 */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-muted-foreground">AI模型</label>
-            <Select value={selectedModel} onValueChange={setSelectedModel}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="选择模型" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableModels.map((model) => (
-                  <SelectItem key={model.key} value={model.key}>
-                    <span className="text-sm">{model.name}</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <label className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
+              <Zap className="w-3 h-3 text-primary" />
+              AI模型
+            </label>
+            <div className="space-y-2">
+              <Button
+                onClick={() => setUseAutoModel(!useAutoModel)}
+                variant={useAutoModel ? "default" : "outline"}
+                className="w-full text-xs"
+              >
+                {useAutoModel ? "✓ 自动选择" : "手动选择"}
+              </Button>
+              
+              {!useAutoModel && (
+                <Select value={selectedModel} onValueChange={setSelectedModel}>
+                  <SelectTrigger className="w-full text-xs">
+                    <SelectValue placeholder="选择模型" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableModels.map((model) => (
+                      <SelectItem key={model.key} value={model.key}>
+                        <span className="text-xs">{model.name}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+            {useAutoModel && (
+              <p className="text-xs text-muted-foreground italic">系统将根据您的问题自动选择最优模型</p>
+            )}
           </div>
         </div>
 
