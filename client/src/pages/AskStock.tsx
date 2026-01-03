@@ -484,7 +484,7 @@ export default function AskStock() {
             </div>
           ) : (
             messages.map((message) => (
-              <div key={message.id} className="space-y-2">
+              <div key={message.id} className="space-y-2 group">
                 <div
                   className={`flex ${
                     message.role === "user" ? "justify-end" : "justify-start"
@@ -501,14 +501,16 @@ export default function AskStock() {
                   </div>
                 </div>
                 {message.role === "assistant" && (
-                  <MessageActions
-                    messageId={message.id}
-                    content={message.content}
-                    role="assistant"
-                    onRegenerate={() => handleRegenerateMessage(message.id)}
-                    onShare={() => handleShareMessage(message.id, message.content)}
-                    onFeedback={(type) => handleMessageFeedback(message.id, type)}
-                  />
+                  <div className="flex justify-start">
+                    <MessageActions
+                      messageId={message.id}
+                      content={message.content}
+                      role="assistant"
+                      onRegenerate={() => handleRegenerateMessage(message.id)}
+                      onShare={() => handleShareMessage(message.id, message.content)}
+                      onFeedback={(type) => handleMessageFeedback(message.id, type)}
+                    />
+                  </div>
                 )}
               </div>
             ))
