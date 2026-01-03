@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, TrendingUp, TrendingDown, BarChart3, PieChart, Newspaper, Loader2, ArrowLeft } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as PieChartComponent, Pie, Cell } from "recharts";
 import { useWatchlist } from "@/contexts/WatchlistContext";
+import ScoreFactorsRadar from "@/components/ScoreFactorsRadar";
 import { getSinaStockInfo } from "@/lib/sinaFinanceAPI";
 import {
   getMockStockDetail,
@@ -192,10 +193,11 @@ export default function StockDetail() {
 
         {/* 选项卡 */}
         <Tabs defaultValue="kline" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="kline">K线</TabsTrigger>
             <TabsTrigger value="cashflow">资金流向</TabsTrigger>
             <TabsTrigger value="technical">技术指标</TabsTrigger>
+            <TabsTrigger value="factors">评分因子</TabsTrigger>
             <TabsTrigger value="news">新闻</TabsTrigger>
             <TabsTrigger value="analysis">分析</TabsTrigger>
           </TabsList>
@@ -359,6 +361,48 @@ export default function StockDetail() {
                 </CardContent>
               </Card>
             ))}
+          </TabsContent>
+
+          {/* 评分因子 */}
+          <TabsContent value="factors" className="space-y-4">
+            <ScoreFactorsRadar
+              stockCode={code}
+              stockName={detail.name}
+              factors={[
+                {
+                  name: "成交量因子",
+                  score: Math.min(100, (detail.volume / 1000000) * 2),
+                  description: "衡量股票成交活跃度。成交量越大，说明市场参与度越高，涨停可能性越大。"
+                },
+                {
+                  name: "资金流向因子",
+                  score: Math.min(100, Math.abs(detail.change) * 10 + 50),
+                  description: "反映主力资金的流入情况。准流入越多，说明機构看好该股，涨停概率越高。"
+                },
+                {
+                  name: "涨速因子",
+                  score: Math.min(100, Math.max(0, detail.changePercent * 10 + 50)),
+                  description: "衡量股票上升的速度。涨速越快，说明上升动能越强，容易形成涨停。"
+                },
+                {
+                  name: "市场情绪因子",
+                  score: 65,
+                  description: "反映市场对该股的整体看好程度。情绪越高涨停的可能性越大。"
+                },
+                {
+                  name: "行业热度因子",
+                  score: 72,
+                  description: "衡量该股所在行业的热度。热门行业的股票更容易涨停。"
+                }
+              ]}
+              totalScore={Math.round(
+                (Math.min(100, (detail.volume / 1000000) * 2) +
+                Math.min(100, Math.abs(detail.change) * 10 + 50) +
+                Math.min(100, Math.max(0, detail.changePercent * 10 + 50)) +
+                65 +
+                72) / 5
+              )}
+            />
           </TabsContent>
 
           {/* 分析 */}

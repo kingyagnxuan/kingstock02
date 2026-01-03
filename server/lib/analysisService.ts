@@ -1,7 +1,7 @@
 import { getDb } from "../db";
 import { dailyLimitUpPotentials, nextDayLimitUpPotentials } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
-import { getCachedData } from "./sinaDataFetcher";
+import { getRealTimeStockData } from "./realTimeDataFetcher";
 
 /**
  * 股票实时数据接口
@@ -46,21 +46,21 @@ export interface AnalysisResult {
 }
 
 /**
- * 获取股票实时数据 - 使用新浪财经API
+ * 获取股票实时数据 - 使用东方财富/新浪财经API
  */
 export async function getStockRealTimeData(
   stockCode: string
 ): Promise<StockRealTimeData | null> {
   try {
-    // 优先尝试从新浪财经获取真实数据
-    const realData = await getCachedData(stockCode);
+    // 优先尝试从东方财富/新浪财经获取真实数据
+    const realData = await getRealTimeStockData(stockCode);
     if (realData) {
       console.log(`成功获取${stockCode}的真实数据`);
       return realData;
     }
 
-    // 如果新浪财经获取失败，使用模拟数据
-    console.warn(`新浪财经获取失败，使用模拟数据: ${stockCode}`);
+    // 如果东方财富/新浪财经获取失败，使用模拟数据
+    console.warn(`真实数据获取失败，使用模拟数据: ${stockCode}`);
     return generateMockData(stockCode);
   } catch (error) {
     console.error("获取实时数据失败:", error);

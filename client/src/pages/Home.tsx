@@ -7,6 +7,7 @@ import { useStockData } from "@/contexts/StockDataContext";
 import { AlertTriangle, TrendingUp } from "lucide-react";
 import NotificationCenter from "@/components/NotificationCenter";
 import MarketNewsAndQuotes from "@/components/MarketNewsAndQuotes";
+import LimitUpTopCard from "@/components/LimitUpTopCard";
 import { mockNotifications, mockMarketNews } from "@/lib/mockCommunityData";
 import { useState } from "react";
 
@@ -57,6 +58,13 @@ export default function Home() {
             {indices.map((index) => (
               <MarketIndexCard key={index.code} index={index} />
             ))}
+          </div>
+
+          {/* Limit Up Top 5 Card */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="md:col-span-2 lg:col-span-4">
+              <LimitUpTopCard />
+            </div>
           </div>
         </section>
 
