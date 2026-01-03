@@ -1,7 +1,8 @@
 import { cn } from "@/lib/utils";
-import { Heart, Home, LineChart, BarChart3, Settings, MessageSquare, User, LogOut, Zap, Bell, Search } from "lucide-react";
+import { Heart, Home, LineChart, BarChart3, Settings, MessageSquare, User, LogOut, Zap, Bell, Search, Moon, Sun } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import NotificationCenterAdvanced from "@/components/NotificationCenterAdvanced";
 import TopSearchBar from "@/components/TopSearchBar";
@@ -15,6 +16,26 @@ import {
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+}
+
+function ThemeToggleButton() {
+  const { theme, toggleTheme } = useTheme();
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={toggleTheme}
+      className="transition-colors"
+      title={theme === 'dark' ? '切换到亮色模式' : '切换到暗黑模式'}
+    >
+      {theme === 'dark' ? (
+        <Sun className="w-4 h-4" />
+      ) : (
+        <Moon className="w-4 h-4" />
+      )}
+    </Button>
+  );
 }
 
 function UserMenu() {
@@ -153,6 +174,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <Settings className="w-4 h-4" />
                   </Button>
                 </Link>
+                <ThemeToggleButton />
                 <UserMenu />
               </div>
             </div>
