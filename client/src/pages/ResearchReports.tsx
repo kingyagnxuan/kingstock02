@@ -1,6 +1,7 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { getLatestReports, getReportById, ResearchReport } from "@/lib/mockResearchReports";
-import { BookOpen, TrendingUp, AlertCircle, Target, MessageCircle, Share2, Plus, Loader2 } from "lucide-react";
+import { generateProfessionalReport } from "@/lib/professionalReportGenerator";
+import { BookOpen, TrendingUp, AlertCircle, Target, MessageCircle, Share2, Plus, Loader2, BarChart3, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,35 +20,32 @@ export default function ResearchReports() {
 
   const handleGenerateReport = async () => {
     if (!keyword.trim()) {
-      toast.error("请输入关键词");
+      toast.error("请输入行业名称");
       return;
     }
     setIsGenerating(true);
     setTimeout(() => {
-      // 生成新的研报
+      // 使用专业级研报生成器生成报告
+      const professionalReport = generateProfessionalReport(keyword);
+      
+      // 转换为 ResearchReport 格式
       const newReport: ResearchReport = {
-        id: `custom_${Date.now()}`,
-        title: `${keyword}行业深度分析报告`,
-        category: "行业研究",
-        author: "AI分析师",
-        date: new Date().toLocaleDateString('zh-CN'),
-        content: `关于${keyword}的深度研究报告\n\n本报告通过对${keyword}行业的深入分析，为投资者提供专业的投资建议。\n\n一、行业概况\n${keyword}行业作为当前市场的热点领域，具有广阔的发展前景。\n\n二、市场分析\n通过对市场数据的分析，我们发现${keyword}行业正处于快速增长阶段。\n\n三、投资建议\n基于以上分析，我们对${keyword}行业的相关上市公司给出如下建议...`,
-        keyPoints: [
-          `${keyword}行业处于快速增长阶段`,
-          "市场需求持续扩大",
-          "政策支持力度加大",
-          "龙头企业优势明显"
-        ],
-        marketOutlook: `${keyword}行业前景看好，预计未来12个月将保持高速增长`,
-        stocks: [
-          { code: "000001", name: "平安银行", currentPrice: 10.5, targetPrice: 12.0, rating: "买入" },
-          { code: "600000", name: "浦发银行", currentPrice: 8.2, targetPrice: 9.5, rating: "增持" }
-        ],
-        riskFactors: [
-          "政策变化风险",
-          "市场竞争加剧",
-          "经济周期风险"
-        ]
+        id: professionalReport.id,
+        title: professionalReport.title,
+        category: "专业研报",
+        author: professionalReport.author,
+        date: professionalReport.date,
+        content: `${professionalReport.executiveSummary}\n\n行业概况\n市场规模: ${professionalReport.industryOverview.marketSize}\n增长率: ${professionalReport.industryOverview.growthRate}\n${professionalReport.industryOverview.description}\n\n宏观分析\n${professionalReport.macroAnalysis.description}\n\n竞争格局\n${professionalReport.competitiveAnalysis.description}\n\n财务分析\n${professionalReport.financialAnalysis.description}`,
+        keyPoints: professionalReport.investmentThesis,
+        marketOutlook: professionalReport.investment.recommendation,
+        stocks: professionalReport.relatedStocks.map(s => ({
+          code: s.code,
+          name: s.name,
+          currentPrice: s.currentPrice,
+          targetPrice: s.targetPrice,
+          rating: s.rating
+        })),
+        riskFactors: professionalReport.risks.map(r => r.risk)
       };
 
       // 将新报告添加到列表顶部
@@ -55,10 +53,10 @@ export default function ResearchReports() {
       setReports(updatedReports);
       setSelectedReport(newReport);
       setIsGenerating(false);
-      toast.success(`已生成关于"${keyword}"的研究报告`);
+      toast.success(`已生成专业级"${keyword}"研究报告`);
       setShowGenerateForm(false);
       setKeyword("");
-    }, 2000);
+    }, 2500);
   };
 
   return (
@@ -176,10 +174,11 @@ export default function ResearchReports() {
 
                 <CardContent className="p-6 space-y-6">
                   <Tabs defaultValue="content" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-4">
                       <TabsTrigger value="content">研报内容</TabsTrigger>
+                      <TabsTrigger value="analysis">专业分析</TabsTrigger>
                       <TabsTrigger value="stocks">相关股票</TabsTrigger>
-                      <TabsTrigger value="risks">风险因素</TabsTrigger>
+                      <TabsTrigger value="risks">风险评估</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="content" className="space-y-4">
@@ -242,6 +241,32 @@ export default function ResearchReports() {
                       </div>
                     </TabsContent>
 
+                    <TabsContent value="analysis" className="space-y-4">
+                      <div className="space-y-4">
+                        <div className="bg-blue-500/10 border-l-4 border-blue-500 rounded-r-lg p-4">
+                          <h4 className="font-bold text-blue-600 mb-2 flex items-center gap-2">
+                            <BarChart3 className="w-4 h-4" />
+                            行业数据
+                          </h4>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div><span className="text-muted-foreground">市场规模:</span> <span className="font-medium">3,500亿元</span></div>
+                            <div><span className="text-muted-foreground">增长率:</span> <span className="font-medium">35-40%</span></div>
+                            <div><span className="text-muted-foreground">净利润率:</span> <span className="font-medium">15-25%</span></div>
+                            <div><span className="text-muted-foreground">市盈率:</span> <span className="font-medium">25-35倍</span></div>
+                          </div>
+                        </div>
+                        <div className="bg-purple-500/10 border-l-4 border-purple-500 rounded-r-lg p-4">
+                          <h4 className="font-bold text-purple-600 mb-2">政策支持</h4>
+                          <ul className="space-y-1 text-sm">
+                            <li>• 产业发展规划支持</li>
+                            <li>• 税收优惠政策</li>
+                            <li>• 研发投入扶持</li>
+                            <li>• 人才引进计划</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </TabsContent>
+
                     <TabsContent value="risks" className="space-y-4">
                       <div className="space-y-3">
                         {selectedReport.riskFactors.map((risk, idx) => (
@@ -249,8 +274,11 @@ export default function ResearchReports() {
                             key={idx}
                             className="bg-red-500/10 border-l-4 border-red-500 rounded-r-lg p-4 flex gap-3"
                           >
-                            <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                            <p className="text-sm text-red-600">{risk}</p>
+                            <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-red-600">{risk}</p>
+                              <p className="text-xs text-red-500 mt-1">风险等级: 中等 | 建议关注</p>
+                            </div>
                           </div>
                         ))}
                       </div>
