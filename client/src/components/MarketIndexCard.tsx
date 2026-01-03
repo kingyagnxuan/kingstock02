@@ -18,10 +18,10 @@ export default function MarketIndexCard({ index }: MarketIndexCardProps) {
         "group-hover:w-1.5"
       )} />
       
-      <CardContent className="p-5 pl-7">
-        <div className="flex justify-between items-start mb-2">
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">{index.name}</h3>
+      <CardContent className="p-3 md:p-5 pl-5 md:pl-7">
+        <div className="flex justify-between items-start mb-2 gap-2">
+          <div className="min-w-0">
+            <h3 className="text-xs md:text-sm font-medium text-muted-foreground truncate">{index.name}</h3>
             <p className="text-xs font-mono text-muted-foreground/60">{index.code}</p>
           </div>
           <div className={cn(
@@ -35,15 +35,15 @@ export default function MarketIndexCard({ index }: MarketIndexCardProps) {
           </div>
         </div>
         
-        <div className="flex items-baseline gap-2 mt-1">
+        <div className="flex items-baseline gap-1 md:gap-2 mt-1">
           <span className={cn(
-            "text-2xl font-bold font-mono tracking-tight",
+            "text-lg md:text-2xl font-bold font-mono tracking-tight",
             isUp ? "text-[var(--chart-1)]" : "text-[var(--chart-2)]"
           )}>
             {index.value.toFixed(2)}
           </span>
           <span className={cn(
-            "text-sm font-mono",
+            "text-xs md:text-sm font-mono",
             isUp ? "text-[var(--chart-1)]/80" : "text-[var(--chart-2)]/80"
           )}>
             {index.change > 0 ? "+" : ""}{index.change.toFixed(2)}

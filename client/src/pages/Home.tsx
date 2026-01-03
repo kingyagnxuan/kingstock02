@@ -35,25 +35,25 @@ export default function Home() {
           onClear={handleClearNotifications}
         />
       </div>
-      <div className="space-y-8">
+      <div className="space-y-6 md:space-y-8">
         {/* Market Overview Section */}
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-              <TrendingUp className="w-6 h-6 text-primary" />
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
+              <TrendingUp className="w-5 md:w-6 h-5 md:h-6 text-primary" />
               市场概览
             </h2>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-xs md:text-sm">
               <div className="text-xs text-muted-foreground font-mono">
                 更新时间: {lastUpdated.toLocaleTimeString()}
               </div>
-              <div className="text-sm text-muted-foreground font-mono">
+              <div className="text-xs md:text-sm text-muted-foreground font-mono">
                 {report.date}
               </div>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
             {indices.map((index) => (
               <MarketIndexCard key={index.code} index={index} />
             ))}
@@ -64,7 +64,7 @@ export default function Home() {
         </section>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Left Column: Limit Up Stocks (2/3 width) */}
           <div className="lg:col-span-2 space-y-8">
             <LimitUpTable stocks={limitUpStocks} />

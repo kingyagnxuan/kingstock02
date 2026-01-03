@@ -108,16 +108,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-background text-foreground flex font-sans">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-sidebar-border bg-sidebar flex flex-col fixed h-full z-10">
-        <div className="p-6 flex items-center gap-3 border-b border-sidebar-border">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
-            <img src="/images/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+      <aside className="hidden md:flex w-64 border-r border-sidebar-border bg-sidebar flex-col fixed h-full z-10">
+          <div className="p-4 md:p-6 flex items-center gap-2 md:gap-3 border-b border-sidebar-border">
+            <div className="w-8 md:w-10 h-8 md:h-10 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg shadow-primary/20">
+              <img src="/images/logo.png" alt="Logo" className="w-6 md:w-8 h-6 md:h-8 object-contain" />
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-lg md:text-2xl font-bold tracking-tight">StockTracker</h1>
+              <p className="text-xs md:text-sm text-muted-foreground">股票投资专家</p>
+            </div>
           </div>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight">StockTracker</h1>
-            <p className="text-sm text-muted-foreground">股票投资专家</p>
-          </div>
-        </div>
 
         <nav className="flex-1 p-4 space-y-2">
           {navItems.map((item) => {
@@ -165,10 +165,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 ml-64 min-h-screen bg-[url('/images/hero-bg.jpg')] bg-cover bg-fixed bg-center">
+      <main className="flex-1 md:ml-64 min-h-screen bg-[url('/images/hero-bg.jpg')] bg-cover bg-fixed bg-center">
         <div className="min-h-screen bg-background/90 backdrop-blur-sm">
           <div className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-md">
-            <div className="container py-3 flex items-center justify-between gap-4">
+            <div className="container px-3 md:px-4 py-3 flex items-center justify-between gap-2 md:gap-4">
               <TopSearchBar />
               <div className="flex items-center gap-2">
                 <NotificationCenterAdvanced />

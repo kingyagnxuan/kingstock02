@@ -458,24 +458,24 @@ export default function AskStock() {
       {/* 主内容区 */}
       <main className="flex-1 flex flex-col">
         {/* 顶部工具栏 */}
-        <div className="border-b border-border bg-card/50 p-4 flex items-center justify-between">
-          <h1 className="text-lg font-semibold">
+        <div className="border-b border-border bg-card/50 p-3 md:p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+          <h1 className="text-base md:text-lg font-semibold">
             {conversations.find((c) => c.id === currentConversationId)?.title || "问票"}
           </h1>
           <div className="flex items-center gap-2">
-            <Button onClick={handleExport} variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              导出
+            <Button onClick={handleExport} variant="outline" size="sm" className="text-xs md:text-sm">
+              <Download className="w-3 md:w-4 h-3 md:h-4 mr-1 md:mr-2" />
+              <span className="hidden md:inline">导出</span>
             </Button>
-            <Button onClick={handleGenerateReport} variant="outline" size="sm" disabled={isLoading}>
-              <FileText className="w-4 h-4 mr-2" />
-              生成报告
+            <Button onClick={handleGenerateReport} variant="outline" size="sm" disabled={isLoading} className="text-xs md:text-sm">
+              <FileText className="w-3 md:w-4 h-3 md:h-4 mr-1 md:mr-2" />
+              <span className="hidden md:inline">生成报告</span>
             </Button>
           </div>
         </div>
 
         {/* 消息区域 */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-4">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
@@ -519,7 +519,7 @@ export default function AskStock() {
         </div>
 
         {/* 输入区域 */}
-        <div className="border-t border-border bg-card/50 p-4">
+        <div className="border-t border-border bg-card/50 p-3 md:p-4">
           <div
             ref={inputContainerRef}
             className="flex items-end gap-2 rounded-lg border border-border bg-background p-2"
