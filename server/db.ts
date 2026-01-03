@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, marketInsights, stockRecommendations, aiConversations, aiMessages, InsertMarketInsight, InsertStockRecommendation, InsertAIConversation, InsertAIMessage } from "../drizzle/schema";
+import { InsertUser, users, marketInsights, stockRecommendations, aiConversations, aiMessages, uploadedFiles, InsertMarketInsight, InsertStockRecommendation, InsertAIConversation, InsertAIMessage, InsertUploadedFile } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -140,4 +140,30 @@ export async function getConversationMessages(conversationId: number) {
   const db = await getDb();
   if (!db) return [];
   return await db.select().from(aiMessages).where(eq(aiMessages.conversationId, conversationId)).orderBy(aiMessages.createdAt);
+}
+
+// 文件相关查询
+export async function uploadFile(data: InsertUploadedFile) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(uploadedFiles).values(data);
+}
+
+export async function getConversationFiles(conversationId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(uploadedFiles).where(eq(uploadedFiles.conversationId, conversationId)).orderBy(desc(uploadedFiles.createdAt));
+}
+
+export async function getFileById(fileId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(uploadedFiles).where(eq(uploadedFiles.id, fileId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateFileAnalysis(fileId: number, extractedText: string, analysisResult: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(uploadedFiles).set({ extractedText, analysisResult }).where(eq(uploadedFiles.id, fileId));
 }

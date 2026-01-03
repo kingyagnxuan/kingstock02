@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Streamdown } from "streamdown";
 import { Send, Plus, Download, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useState, useRef, useEffect } from "react";
+import { FileUpload } from "@/components/FileUpload";
+import { FilePreview } from "@/components/FilePreview";
 
 export default function AskStock() {
   const { user, isAuthenticated } = useAuth();
@@ -15,6 +17,8 @@ export default function AskStock() {
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // tRPC查询和变更
@@ -28,6 +32,12 @@ export default function AskStock() {
     { enabled: !!currentConversationId }
   );
   const generateReportMutation = trpc.ai.generateReport.useMutation();
+  const getConversationFilesQuery = trpc.files.getConversationFiles.useQuery(
+    { conversationId: currentConversationId! },
+    { enabled: !!currentConversationId }
+  );
+  const analyzeImageMutation = trpc.files.analyzeImage.useMutation();
+  const analyzeDocumentMutation = trpc.files.analyzeDocument.useMutation();
 
   // 加载对话列表
   useEffect(() => {
@@ -45,6 +55,13 @@ export default function AskStock() {
       setMessages(getMessagesQuery.data);
     }
   }, [getMessagesQuery.data]);
+
+  // 加载对话文件
+  useEffect(() => {
+    if (getConversationFilesQuery.data) {
+      setUploadedFiles(getConversationFilesQuery.data);
+    }
+  }, [getConversationFilesQuery.data]);
 
   // 自动滚动到最新消息
   useEffect(() => {
@@ -97,12 +114,58 @@ export default function AskStock() {
           createdAt: new Date(),
         },
       ]);
-
       toast.success("AI已回复");
     } catch (error) {
       toast.error("发送消息失败");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // 处理文件上传
+  const handleFileSelect = async (file: File, base64?: string) => {
+    if (!currentConversationId) {
+      toast.error("请先创建对话");
+      return;
+    }
+
+    setIsUploadingFile(true);
+    try {
+      const isImage = file.type.startsWith("image/");
+
+      if (isImage && base64) {
+        // 分析图片
+        const result = await analyzeImageMutation.mutateAsync({
+          fileId: Date.now(),
+          base64Data: base64.split(",")[1] || base64,
+          fileName: file.name,
+        });
+        toast.success("图片分析完成");
+      } else {
+        // 分析文档
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const text = e.target?.result as string;
+          try {
+            await analyzeDocumentMutation.mutateAsync({
+              fileId: Date.now(),
+              extractedText: text,
+              fileType: file.type.includes("pdf") ? "pdf" : "document",
+            });
+            toast.success("文档分析完成");
+          } catch (error) {
+            toast.error("文档分析失败");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // 重新加载文件列表
+      await getConversationFilesQuery.refetch();
+    } catch (error) {
+      toast.error("文件处理失败");
+    } finally {
+      setIsUploadingFile(false);
     }
   };
 
@@ -271,6 +334,31 @@ export default function AskStock() {
               )}
               <div ref={messagesEndRef} />
             </div>
+
+            {/* 文件上传区域 */}
+            <div className="border-t border-border bg-card/50 p-4">
+              <FileUpload onFileSelect={handleFileSelect} isLoading={isUploadingFile} />
+            </div>
+
+            {/* 已上传文件列表 */}
+            {uploadedFiles.length > 0 && (
+              <div className="border-t border-border bg-card/50 p-4 max-h-48 overflow-y-auto">
+                <h3 className="text-sm font-medium mb-3">已上传文件</h3>
+                <div className="space-y-2">
+                  {uploadedFiles.map((file) => (
+                    <FilePreview
+                      key={file.id}
+                      fileName={file.fileName}
+                      fileType={file.fileType}
+                      mimeType={file.mimeType}
+                      s3Url={file.s3Url}
+                      extractedText={file.extractedText}
+                      analysisResult={file.analysisResult ? JSON.parse(file.analysisResult) : undefined}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* 输入区域 */}
             <div className="border-t border-border bg-card/50 p-4">

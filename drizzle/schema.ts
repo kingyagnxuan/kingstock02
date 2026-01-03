@@ -86,3 +86,22 @@ export const aiMessages = mysqlTable("aiMessages", {
 
 export type AIMessage = typeof aiMessages.$inferSelect;
 export type InsertAIMessage = typeof aiMessages.$inferInsert;
+
+// 文件存储表
+export const uploadedFiles = mysqlTable("uploadedFiles", {
+  id: int("id").autoincrement().primaryKey(),
+  conversationId: int("conversationId").notNull(),
+  messageId: int("messageId"), // 关联的消息ID
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  fileType: varchar("fileType", { length: 50 }).notNull(), // image, document, pdf等
+  mimeType: varchar("mimeType", { length: 100 }).notNull(),
+  fileSize: int("fileSize").notNull(), // 字节数
+  s3Key: varchar("s3Key", { length: 500 }).notNull(), // S3存储路径
+  s3Url: text("s3Url").notNull(), // S3访问URL
+  extractedText: text("extractedText"), // 提取的文本内容
+  analysisResult: text("analysisResult"), // AI分析结果（JSON）
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type UploadedFile = typeof uploadedFiles.$inferSelect;
+export type InsertUploadedFile = typeof uploadedFiles.$inferInsert;
