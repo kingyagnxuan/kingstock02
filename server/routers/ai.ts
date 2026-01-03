@@ -3,8 +3,14 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { createAIConversation, getUserConversations, addAIMessage, getConversationMessages } from "../db";
 import { invokeLLM } from "../_core/llm";
 import { TRPCError } from "@trpc/server";
+import { getAvailableLLMModels } from "../_core/llmModels";
 
 export const aiRouter = router({
+  // 获取可用的LLM模型列表
+  getAvailableModels: protectedProcedure.query(async () => {
+    return getAvailableLLMModels();
+  }),
+
   // 创建新对话
   createConversation: protectedProcedure
     .input(
@@ -12,14 +18,16 @@ export const aiRouter = router({
         title: z.string().optional(),
         stockCode: z.string().optional(),
         systemPrompt: z.string().optional(),
+        model: z.string().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
       const title = input.title || `问票对话 ${new Date().toLocaleString()}`;
+      const model = input.model || "gemini-2.5-flash";
       const systemPrompt =
         input.systemPrompt ||
         `你是一位资深的股票投资分析师。你将帮助用户分析股票、提供投资建议、解答投资相关问题。
-        
+
 你的职责包括：
 1. 基于实时数据分析股票走势和投资机会
 2. 提供专业的技术分析和基本面分析
@@ -33,7 +41,7 @@ export const aiRouter = router({
         userId: ctx.user!.id,
         title,
         stockCode: input.stockCode,
-        model: "gpt-4",
+        model,
         systemPrompt,
       });
 
@@ -52,6 +60,7 @@ export const aiRouter = router({
       z.object({
         conversationId: z.number(),
         message: z.string(),
+        model: z.string().optional(),
         stockData: z
           .object({
             code: z.string(),
@@ -105,6 +114,7 @@ export const aiRouter = router({
       try {
         const response = await invokeLLM({
           messages: conversationMessages,
+          model: input.model || conversation.model || "gemini-2.5-flash",
         });
 
         const aiContent = response.choices[0]?.message.content;
@@ -148,48 +158,14 @@ export const aiRouter = router({
 
       const messages = await getConversationMessages(input.conversationId);
       return messages.map((m: any) => ({
-        ...m,
-        metadata: m.metadata ? JSON.parse(m.metadata) : undefined,
+        id: m.id,
+        role: m.role,
+        content: m.content,
+        createdAt: m.createdAt,
       }));
     }),
 
-  // 导出对话为文本
-  exportConversation: protectedProcedure
-    .input(z.object({ conversationId: z.number() }))
-    .query(async ({ input, ctx }) => {
-      // 验证对话所有权
-      const conversations = await getUserConversations(ctx.user!.id);
-      const conversation = conversations.find((c: any) => c.id === input.conversationId);
-      if (!conversation) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Conversation not found",
-        });
-      }
-
-      const messages = await getConversationMessages(input.conversationId);
-
-      // 生成文本格式的对话
-      const text = [
-        `对话标题: ${conversation.title}`,
-        `创建时间: ${conversation.createdAt.toLocaleString()}`,
-        `关联股票: ${conversation.stockCode || "无"}`,
-        "",
-        "对话内容:",
-        "---",
-        ...messages.map((m: any) => {
-          const role = m.role === "user" ? "用户" : m.role === "assistant" ? "AI分析师" : "系统";
-          return `[${role}]: ${m.content}`;
-        }),
-      ].join("\n");
-
-      return {
-        filename: `问票对话_${conversation.title}_${new Date().toISOString().split("T")[0]}.txt`,
-        content: text,
-      };
-    }),
-
-  // 生成投资报告
+  // 生成报告
   generateReport: protectedProcedure
     .input(z.object({ conversationId: z.number() }))
     .mutation(async ({ input, ctx }) => {
@@ -205,46 +181,25 @@ export const aiRouter = router({
 
       const messages = await getConversationMessages(input.conversationId);
 
-      // 使用LLM生成投资报告
-      const prompt = `基于以下对话内容，生成一份专业的投资分析报告。报告应包括：
-1. 核心观点总结
-2. 关键数据分析
-3. 投资建议
-4. 风险提示
-5. 后续关注点
+      // 构建报告内容
+      const reportContent = [
+        `# 问票分析报告`,
+        `\n## 对话信息`,
+        `- **标题**: ${conversation.title}`,
+        `- **创建时间**: ${new Date(conversation.createdAt).toLocaleString()}`,
+        `- **使用模型**: ${conversation.model}`,
+        `\n## 对话内容`,
+        `\n${messages
+          .map((m: any) => {
+            const role = m.role === "user" ? "### 用户提问" : "### AI分析";
+            return `${role}\n\n${m.content}`;
+          })
+          .join("\n\n---\n\n")}`,
+      ].join("\n");
 
-对话内容：
-${messages.map((m: any) => `${m.role === "user" ? "用户" : "AI分析师"}: ${m.content}`).join("\n")}`;
-
-      try {
-        const response = await invokeLLM({
-          messages: [
-            {
-              role: "system",
-              content: "你是一位专业的投资分析师，请生成一份详细的投资分析报告。",
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-        });
-
-        const reportContent = response.choices[0]?.message.content;
-        if (!reportContent || typeof reportContent !== "string") {
-          throw new Error("Invalid response from LLM");
-        }
-
-        return {
-          filename: `投资分析报告_${conversation.title}_${new Date().toISOString().split("T")[0]}.md`,
-          content: reportContent,
-        };
-      } catch (error) {
-        console.error("Failed to generate report:", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to generate report",
-        });
-      }
+      return {
+        content: reportContent,
+        filename: `问票报告_${new Date().toISOString().split("T")[0]}.md`,
+      };
     }),
 });

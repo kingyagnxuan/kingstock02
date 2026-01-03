@@ -35,6 +35,9 @@ export function cleanMarkdownText(text: string): string {
   text = text.replace(/\*(.+?)\*/g, "$1");
   text = text.replace(/_(.+?)_/g, "$1");
 
+  // 移除删除线标记 (~~text~~)
+  text = text.replace(/~~(.+?)~~/g, "$1");
+
   // 移除代码标记 (`code`)
   text = text.replace(/`(.+?)`/g, "$1");
 
@@ -51,9 +54,29 @@ export function cleanMarkdownText(text: string): string {
   // 移除引用标记 (> text)
   text = text.replace(/^>\s+/gm, "");
 
+  // 移除水平线
+  text = text.replace(/^-{3,}$/gm, "");
+  text = text.replace(/^\*{3,}$/gm, "");
+  text = text.replace(/^_{3,}$/gm, "");
+
+  // 移除表格标记
+  text = text.replace(/\|(.+?)\|/g, "$1");
+
+  // 移除脚注标记
+  text = text.replace(/\[\^\d+\]:/g, "");
+  text = text.replace(/\[\^\d+\]/g, "");
+
+  // 移除HTML标签
+  text = text.replace(/<[^>]+>/g, "");
+
+  // 移除LaTeX公式
+  text = text.replace(/\$\$[\s\S]*?\$\$/g, "");
+  text = text.replace(/\$[^$]*\$/g, "");
+
   // 移除多余的空白和换行
   text = text.replace(/\n\n+/g, "。");
   text = text.replace(/\n/g, "");
+  text = text.replace(/\s+/g, "");
 
   return text.trim();
 }

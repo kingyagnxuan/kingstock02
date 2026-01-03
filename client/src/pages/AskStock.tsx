@@ -1,14 +1,15 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Streamdown } from "streamdown";
 import { Send, Plus, Download, FileText, Loader2, Paperclip, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useRef, useEffect } from "react";
 import { FileList } from "@/components/FileList";
 import { MessageActions } from "@/components/MessageActions";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function AskStock() {
   const { user, isAuthenticated } = useAuth();
@@ -19,12 +20,17 @@ export default function AskStock() {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
+  const [availableModels, setAvailableModels] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
 
   // tRPC查询和变更
   const getConversationsQuery = trpc.ai.getConversations.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const getAvailableModelsQuery = trpc.ai.getAvailableModels.useQuery(undefined, {
     enabled: isAuthenticated,
   });
   const createConversationMutation = trpc.ai.createConversation.useMutation();
@@ -40,6 +46,13 @@ export default function AskStock() {
   );
   const analyzeImageMutation = trpc.files.analyzeImage.useMutation();
   const analyzeDocumentMutation = trpc.files.analyzeDocument.useMutation();
+
+  // 加载可用的LLM模型
+  useEffect(() => {
+    if (getAvailableModelsQuery.data) {
+      setAvailableModels(getAvailableModelsQuery.data);
+    }
+  }, [getAvailableModelsQuery.data]);
 
   // 加载对话列表
   useEffect(() => {
@@ -100,15 +113,14 @@ export default function AskStock() {
 
     const handlePaste = (e: ClipboardEvent) => {
       const items = e.clipboardData?.items;
-      if (!items) return;
-
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].kind === "file" && items[i].type.startsWith("image/")) {
-          const file = items[i].getAsFile();
-          if (file) {
-            handleFile(file);
+      if (items) {
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].kind === "file") {
+            const file = items[i].getAsFile();
+            if (file) {
+              handleFile(file);
+            }
           }
-          break;
         }
       }
     };
@@ -131,6 +143,7 @@ export default function AskStock() {
     try {
       await createConversationMutation.mutateAsync({
         title: `问票对话 ${new Date().toLocaleString()}`,
+        model: selectedModel,
       });
       await getConversationsQuery.refetch();
       toast.success("新对话已创建");
@@ -151,6 +164,7 @@ export default function AskStock() {
       const response = await sendMessageMutation.mutateAsync({
         conversationId: currentConversationId,
         message: userMessage,
+        model: selectedModel,
       });
 
       setMessages([
@@ -160,17 +174,15 @@ export default function AskStock() {
           conversationId: currentConversationId,
           role: "user",
           content: userMessage,
-          createdAt: new Date(),
         },
         {
           id: Date.now() + 1,
           conversationId: currentConversationId,
           role: "assistant",
           content: response.content,
-          createdAt: new Date(),
         },
       ]);
-      toast.success("AI已回复");
+      toast.success("消息已发送");
     } catch (error) {
       toast.error("发送消息失败");
     } finally {
@@ -181,22 +193,20 @@ export default function AskStock() {
   // 处理文件上传
   const handleFile = async (file: File) => {
     if (!currentConversationId) {
-      toast.error("请先创建对话");
+      toast.error("请先选择或创建一个对话");
       return;
     }
 
     setIsUploadingFile(true);
     try {
-      const isImage = file.type.startsWith("image/");
-
-      if (isImage) {
+      if (file.type.includes("image")) {
         const reader = new FileReader();
         reader.onload = async (e) => {
           const base64 = e.target?.result as string;
           try {
             await analyzeImageMutation.mutateAsync({
               fileId: Date.now(),
-              base64Data: base64.split(",")[1] || base64,
+              base64Data: base64,
               fileName: file.name,
             });
             toast.success("图片已分析");
@@ -314,6 +324,7 @@ export default function AskStock() {
       const response = await sendMessageMutation.mutateAsync({
         conversationId: currentConversationId!,
         message: userMessage.content,
+        model: selectedModel,
       });
 
       setMessages(
@@ -363,7 +374,7 @@ export default function AskStock() {
   };
 
   // 消息反馈
-  const handleMessageFeedback = (messageId: number, type: "like" | "dislike" | null) => {
+  const handleMessageFeedback = (messageId: number, type: "like" | "dislike") => {
     console.log(`Message ${messageId} feedback: ${type}`);
   };
 
@@ -386,11 +397,28 @@ export default function AskStock() {
     <div className="flex h-screen bg-background">
       {/* 侧边栏 - 对话列表 */}
       <aside className="w-64 border-r border-border bg-card/50 flex flex-col">
-        <div className="p-4 border-b border-border">
+        <div className="p-4 border-b border-border space-y-3">
           <Button onClick={handleNewConversation} className="w-full" variant="default">
             <Plus className="w-4 h-4 mr-2" />
             新对话
           </Button>
+
+          {/* LLM模型选择器 */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-muted-foreground">AI模型</label>
+            <Select value={selectedModel} onValueChange={setSelectedModel}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="选择模型" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableModels.map((model) => (
+                  <SelectItem key={model.key} value={model.key}>
+                    <span className="text-sm">{model.name}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -399,16 +427,15 @@ export default function AskStock() {
               key={conv.id}
               onClick={() => {
                 setCurrentConversationId(conv.id);
-                setMessages([]);
               }}
               className={`p-3 rounded-lg cursor-pointer transition-colors ${
                 currentConversationId === conv.id
                   ? "bg-primary text-primary-foreground"
-                  : "bg-muted hover:bg-muted/80"
+                  : "bg-card hover:bg-card/80"
               }`}
             >
               <p className="text-sm font-medium truncate">{conv.title}</p>
-              <p className="text-xs opacity-75">
+              <p className="text-xs text-muted-foreground mt-1">
                 {new Date(conv.createdAt).toLocaleDateString()}
               </p>
             </div>
@@ -416,181 +443,126 @@ export default function AskStock() {
         </div>
       </aside>
 
-      {/* 主聊天区域 */}
+      {/* 主内容区 */}
       <main className="flex-1 flex flex-col">
-        {currentConversationId ? (
-          <>
-            {/* 工具栏 */}
-            <div className="border-b border-border bg-card/50 p-4 flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExport}
-                disabled={messages.length === 0}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                导出对话
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleGenerateReport}
-                disabled={messages.length === 0 || isLoading}
-              >
-                <FileText className="w-4 h-4 mr-2" />
-                生成报告
-              </Button>
-            </div>
+        {/* 顶部工具栏 */}
+        <div className="border-b border-border bg-card/50 p-4 flex items-center justify-between">
+          <h1 className="text-lg font-semibold">
+            {conversations.find((c) => c.id === currentConversationId)?.title || "问票"}
+          </h1>
+          <div className="flex items-center gap-2">
+            <Button onClick={handleExport} variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-2" />
+              导出
+            </Button>
+            <Button onClick={handleGenerateReport} variant="outline" size="sm" disabled={isLoading}>
+              <FileText className="w-4 h-4 mr-2" />
+              生成报告
+            </Button>
+          </div>
+        </div>
 
-            {/* 消息区域 */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {messages.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-muted-foreground">
-                  <p>开始提问，获取专业的股票投资分析</p>
-                </div>
-              ) : (
-                messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} group`}
-                  >
-                    <div className="flex flex-col gap-2">
-                      <Card
-                        className={`max-w-2xl ${
-                          msg.role === "user"
-                            ? "bg-primary/10 border-primary/20 text-foreground"
-                            : "bg-muted/50 border-border/50 text-foreground"
-                        }`}
-                      >
-                        <CardContent className="p-4">
-                          {msg.role === "assistant" ? (
-                            <Streamdown>{msg.content}</Streamdown>
-                          ) : (
-                            <p>{msg.content}</p>
-                          )}
-                        </CardContent>
-                      </Card>
-                      <MessageActions
-                        messageId={msg.id}
-                        content={msg.content}
-                        role={msg.role}
-                        onRegenerate={msg.role === "assistant" ? () => handleRegenerateMessage(msg.id) : undefined}
-                        onEdit={msg.role === "user" ? () => handleEditMessage(msg.id) : undefined}
-                        onDelete={msg.role === "user" ? () => handleDeleteMessage(msg.id) : undefined}
-                        onShare={() => handleShareMessage(msg.id, msg.content)}
-                        onFeedback={(type) => handleMessageFeedback(msg.id, type)}
-                      />
-                    </div>
-                  </div>
-                ))
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* 已上传文件列表 */}
-            {uploadedFiles.length > 0 && (
-              <div className="border-t border-border bg-card/50 p-4">
-                <p className="text-xs font-medium text-muted-foreground mb-2">已上传文件</p>
-                <FileList files={uploadedFiles} />
+        {/* 消息区域 */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {messages.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <p className="text-muted-foreground mb-4">开始提问，获取专业的投资分析建议</p>
               </div>
-            )}
+            </div>
+          ) : (
+            messages.map((message) => (
+              <div key={message.id} className="space-y-2">
+                <div
+                  className={`flex ${
+                    message.role === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-2xl rounded-lg p-4 ${
+                      message.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-card border border-border"
+                    }`}
+                  >
+                    <Streamdown>{message.content}</Streamdown>
+                  </div>
+                </div>
+                {message.role === "assistant" && (
+                  <MessageActions
+                    messageId={message.id}
+                    content={message.content}
+                    role="assistant"
+                    onRegenerate={() => handleRegenerateMessage(message.id)}
+                    onShare={() => handleShareMessage(message.id, message.content)}
+                    onFeedback={(type) => handleMessageFeedback(message.id, type)}
+                  />
+                )}
+              </div>
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </div>
 
-            {/* 输入区域 - Manus风格 */}
-            <div className="border-t border-border bg-card/50 p-4">
+        {/* 输入区域 */}
+        <div className="border-t border-border bg-card/50 p-4">
+          <div
+            ref={inputContainerRef}
+            className="flex items-end gap-2 rounded-lg border border-border bg-background p-2"
+          >
+            <Input
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+              disabled={isLoading}
+              className="flex-1 border-0 bg-transparent focus-visible:ring-0 px-0"
+              placeholder="输入您的问题...（支持拖拽和粘贴图片）"
+            />
+
+            {/* 右边操作按钮 */}
+            <div className="flex items-center gap-1">
+              <Button
+                onClick={handleFileButtonClick}
+                disabled={isUploadingFile}
+                variant="ghost"
+                size="sm"
+                className="p-2 h-auto"
+              >
+                <Paperclip className="w-5 h-5" />
+              </Button>
               <input
                 ref={fileInputRef}
                 type="file"
                 onChange={handleFileInputChange}
                 className="hidden"
-                disabled={isLoading}
-                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
               />
-
-              <div
-                ref={inputContainerRef}
-                className="flex items-center gap-2 px-4 py-3 bg-background rounded-full border border-border hover:border-primary/50 transition-colors focus-within:ring-2 focus-within:ring-primary/30"
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-2 h-auto"
               >
-                {/* 左边功能按钮 */}
-                <div className="flex items-center gap-1">
-                  <Button
-                    onClick={handleNewConversation}
-                    variant="ghost"
-                    size="sm"
-                    className="p-2 h-auto hover:bg-muted"
-                    title="新建对话"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </Button>
-                  <Button
-                    onClick={handleFileButtonClick}
-                    variant="ghost"
-                    size="sm"
-                    className="p-2 h-auto hover:bg-muted"
-                    disabled={isUploadingFile}
-                    title="上传文件"
-                  >
-                    <Paperclip className="w-5 h-5" />
-                  </Button>
-                </div>
-
-                {/* 中间输入框 */}
-                <Input
-                  placeholder="输入您的问题...（支持拖拽和粘贴图片）"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                  disabled={isLoading}
-                  className="flex-1 border-0 bg-transparent focus-visible:ring-0 px-0"
-                />
-
-                {/* 右边操作按钮 */}
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="p-2 h-auto hover:bg-muted"
-                    title="语音输入"
-                    disabled
-                  >
-                    <Mic className="w-5 h-5" />
-                  </Button>
-                  <Button
-                    onClick={handleSendMessage}
-                    disabled={isLoading || !inputValue.trim()}
-                    size="sm"
-                    className="p-2 h-auto rounded-full bg-foreground text-background hover:bg-foreground/90"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Send className="w-5 h-5" />
-                    )}
-                  </Button>
-                </div>
-              </div>
+                <Mic className="w-5 h-5" />
+              </Button>
+              <Button
+                onClick={handleSendMessage}
+                disabled={isLoading || !inputValue.trim()}
+                size="sm"
+                className="p-2 h-auto rounded-full bg-foreground text-background hover:bg-foreground/90"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+              </Button>
             </div>
-          </>
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <Card className="w-96">
-              <CardHeader>
-                <CardTitle>创建新对话</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">点击左侧"新对话"按钮开始</p>
-                <Button onClick={handleNewConversation} className="w-full">
-                  <Plus className="w-4 h-4 mr-2" />
-                  创建对话
-                </Button>
-              </CardContent>
-            </Card>
           </div>
-        )}
+        </div>
       </main>
     </div>
   );
