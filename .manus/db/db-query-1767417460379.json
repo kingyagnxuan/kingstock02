@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO nextDayLimitUpPotentials (stockCode, stockName, closingPrice, priceChangePercent, dayVolume, dayNetMoneyFlow, technicalTrend, fundamentalScore, sentimentScore, industryMomentum, nextDayPotential, keyFactors, riskFactors, analysisReport, tradingDate) VALUES \n('000001', '平安银行', '12.50', '+5.2%', '5000万', '5亿', '上升', '7.5', '8.2', '强', '82.3', '[\"资金流入强劲\",\"技术突破\"]', '[\"市场波动风险\"]', '综合分析：平安银行今日表现强势，资金面支持，技术面看好，次日有较大涨停潜力。', '2026-01-03'),\n('000333', '美的集团', '35.80', '+4.5%', '2000万', '2.5亿', '上升', '8.0', '7.8', '强', '76.5', '[\"行业景气度高\",\"资金关注\"]', '[\"估值风险\"]', '综合分析：美的集团作为行业龙头，今日表现良好，行业景气度支持，次日有中等涨停潜力。', '2026-01-03'),\n('000002', '万科A', '15.30', '+3.1%', '3000万', '3亿', '横盘', '6.5', '6.2', '中', '58.9', '[\"基本面稳定\"]', '[\"市场风险\",\"政策风险\"]', '综合分析：万科A基本面稳定，但市场情绪一般，次日涨停潜力有限。', '2026-01-03');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user FiA9Fzg4dmMGF5A.root --database SRLUWoyCJWdu4NrFmMUjGU --execute INSERT INTO nextDayLimitUpPotentials (stockCode, stockName, closingPrice, priceChangePercent, dayVolume, dayNetMoneyFlow, technicalTrend, fundamentalScore, sentimentScore, industryMomentum, nextDayPotential, keyFactors, riskFactors, analysisReport, tradingDate) VALUES \n('000001', '平安银行', '12.50', '+5.2%', '5000万', '5亿', '上升', '7.5', '8.2', '强', '82.3', '[\"资金流入强劲\",\"技术突破\"]', '[\"市场波动风险\"]', '综合分析：平安银行今日表现强势，资金面支持，技术面看好，次日有较大涨停潜力。', '2026-01-03'),\n('000333', '美的集团', '35.80', '+4.5%', '2000万', '2.5亿', '上升', '8.0', '7.8', '强', '76.5', '[\"行业景气度高\",\"资金关注\"]', '[\"估值风险\"]', '综合分析：美的集团作为行业龙头，今日表现良好，行业景气度支持，次日有中等涨停潜力。', '2026-01-03'),\n('000002', '万科A', '15.30', '+3.1%', '3000万', '3亿', '横盘', '6.5', '6.2', '中', '58.9', '[\"基本面稳定\"]', '[\"市场风险\",\"政策风险\"]', '综合分析：万科A基本面稳定，但市场情绪一般，次日涨停潜力有限。', '2026-01-03');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 83
+}

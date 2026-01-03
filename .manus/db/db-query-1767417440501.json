@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO dailyLimitUpPotentials (stockCode, stockName, currentPrice, priceChangePercent, volume, volumeRatio, netMoneyFlow, moneyFlowPercent, riseSpeed, marketSentiment, industryHotness, technicalSignal, limitUpProbability, analysisReason, tradingDate) VALUES \n('000001', '平安银行', '12.50', '+5.2%', '5000万', '1.5', '5亿', '+2.1%', '5.2%', '强势', '热', '看涨', '85.5', '资金面强劲，技术面看涨', '2026-01-03'),\n('000002', '万科A', '15.30', '+3.1%', '3000万', '1.2', '3亿', '+1.8%', '3.1%', '中性', '温', '中性', '62.3', '基本面稳定，需要观察', '2026-01-03'),\n('000333', '美的集团', '35.80', '+4.5%', '2000万', '1.8', '2.5亿', '+2.5%', '4.5%', '强势', '热', '看涨', '78.9', '行业景气度高，资金关注', '2026-01-03');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user FiA9Fzg4dmMGF5A.root --database SRLUWoyCJWdu4NrFmMUjGU --execute INSERT INTO dailyLimitUpPotentials (stockCode, stockName, currentPrice, priceChangePercent, volume, volumeRatio, netMoneyFlow, moneyFlowPercent, riseSpeed, marketSentiment, industryHotness, technicalSignal, limitUpProbability, analysisReason, tradingDate) VALUES \n('000001', '平安银行', '12.50', '+5.2%', '5000万', '1.5', '5亿', '+2.1%', '5.2%', '强势', '热', '看涨', '85.5', '资金面强劲，技术面看涨', '2026-01-03'),\n('000002', '万科A', '15.30', '+3.1%', '3000万', '1.2', '3亿', '+1.8%', '3.1%', '中性', '温', '中性', '62.3', '基本面稳定，需要观察', '2026-01-03'),\n('000333', '美的集团', '35.80', '+4.5%', '2000万', '1.8', '2.5亿', '+2.5%', '4.5%', '强势', '热', '看涨', '78.9', '行业景气度高，资金关注', '2026-01-03');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 69
+}
