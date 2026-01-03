@@ -77,8 +77,10 @@ export default function StrategyBuilder({ onClose }: StrategyBuilderProps) {
 
     try {
       const aiGeneratedFactors: SelectionFactor[] = [];
+      const prompt = aiPrompt.toLowerCase();
       
-      if (aiPrompt.includes("涨停") || aiPrompt.includes("追涨")) {
+      // 涨停相关
+      if (prompt.includes("涨停") || prompt.includes("追涨") || prompt.includes("limit")) {
         if (PREDEFINED_FACTORS["tech-limit-up"]) {
           aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["tech-limit-up"], value: true });
         }
@@ -87,7 +89,8 @@ export default function StrategyBuilder({ onClose }: StrategyBuilderProps) {
         }
       }
       
-      if (aiPrompt.includes("低估") || aiPrompt.includes("价值")) {
+      // 低估值相关
+      if (prompt.includes("低估") || prompt.includes("价值") || prompt.includes("value")) {
         if (PREDEFINED_FACTORS["fund-pe"]) {
           aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-pe"], value: [10, 25] });
         }
@@ -96,7 +99,8 @@ export default function StrategyBuilder({ onClose }: StrategyBuilderProps) {
         }
       }
       
-      if (aiPrompt.includes("成长") || aiPrompt.includes("高增长")) {
+      // 成长相关
+      if (prompt.includes("成长") || prompt.includes("高增长") || prompt.includes("growth")) {
         if (PREDEFINED_FACTORS["fund-growth"]) {
           aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-growth"], value: "high" });
         }
@@ -105,13 +109,39 @@ export default function StrategyBuilder({ onClose }: StrategyBuilderProps) {
         }
       }
       
-      if (aiPrompt.includes("AI") || aiPrompt.includes("科技")) {
+      // AI、科技相关
+      if (prompt.includes("ai") || prompt.includes("科技") || prompt.includes("技术")) {
         if (PREDEFINED_FACTORS["sentiment-hot"]) {
           aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["sentiment-hot"], value: true });
         }
       }
+      
+      // 龙头、中军、板块相关
+      if (prompt.includes("龙头") || prompt.includes("中军") || prompt.includes("板块") || prompt.includes("leader")) {
+        if (PREDEFINED_FACTORS["sentiment-hot"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["sentiment-hot"], value: true });
+        }
+        if (PREDEFINED_FACTORS["fund-growth"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-growth"], value: "high" });
+        }
+      }
+      
+      // 商业航天、新能源等特定行业
+      if (prompt.includes("商业航天") || prompt.includes("新能源") || prompt.includes("电动车") || 
+          prompt.includes("华为") || prompt.includes("花卉")) {
+        if (PREDEFINED_FACTORS["sentiment-hot"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["sentiment-hot"], value: true });
+        }
+        if (PREDEFINED_FACTORS["fund-growth"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-growth"], value: "high" });
+        }
+      }
 
+      // 如果没有生成任何因子，使用默认因子
       if (aiGeneratedFactors.length === 0) {
+        if (PREDEFINED_FACTORS["sentiment-hot"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["sentiment-hot"], value: true });
+        }
         if (PREDEFINED_FACTORS["tech-volume"]) {
           aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["tech-volume"], value: [10, 100] });
         }
