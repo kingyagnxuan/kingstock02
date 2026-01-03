@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Streamdown } from "streamdown";
-import { Send, Plus, Download, FileText, Loader2 } from "lucide-react";
+import { Send, Plus, Download, FileText, Loader2, Paperclip, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useRef, useEffect } from "react";
-import { FileUploadButton } from "@/components/FileUploadButton";
 import { FileList } from "@/components/FileList";
 
 export default function AskStock() {
@@ -20,6 +19,7 @@ export default function AskStock() {
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
 
   // tRPC查询和变更
@@ -230,6 +230,18 @@ export default function AskStock() {
     }
   };
 
+  // 点击文件上传按钮
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFile(files[0]);
+    }
+  };
+
   // 导出对话
   const handleExport = async () => {
     if (!currentConversationId) return;
@@ -401,12 +413,45 @@ export default function AskStock() {
               </div>
             )}
 
-            {/* 输入区域 */}
+            {/* 输入区域 - Manus风格 */}
             <div className="border-t border-border bg-card/50 p-4">
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileInputChange}
+                className="hidden"
+                disabled={isLoading}
+                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+              />
+
               <div
                 ref={inputContainerRef}
-                className="flex gap-2 rounded-lg transition-all"
+                className="flex items-center gap-2 px-4 py-3 bg-background rounded-full border border-border hover:border-primary/50 transition-colors focus-within:ring-2 focus-within:ring-primary/30"
               >
+                {/* 左边功能按钮 */}
+                <div className="flex items-center gap-1">
+                  <Button
+                    onClick={handleNewConversation}
+                    variant="ghost"
+                    size="sm"
+                    className="p-2 h-auto hover:bg-muted"
+                    title="新建对话"
+                  >
+                    <Plus className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    onClick={handleFileButtonClick}
+                    variant="ghost"
+                    size="sm"
+                    className="p-2 h-auto hover:bg-muted"
+                    disabled={isUploadingFile}
+                    title="上传文件"
+                  >
+                    <Paperclip className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                {/* 中间输入框 */}
                 <Input
                   placeholder="输入您的问题...（支持拖拽和粘贴图片）"
                   value={inputValue}
@@ -418,22 +463,33 @@ export default function AskStock() {
                     }
                   }}
                   disabled={isLoading}
-                  className="flex-1"
+                  className="flex-1 border-0 bg-transparent focus-visible:ring-0 px-0"
                 />
-                <FileUploadButton
-                  onFileSelect={handleFile}
-                  isLoading={isUploadingFile}
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={isLoading || !inputValue.trim()}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Send className="w-4 h-4" />
-                  )}
-                </Button>
+
+                {/* 右边操作按钮 */}
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="p-2 h-auto hover:bg-muted"
+                    title="语音输入"
+                    disabled
+                  >
+                    <Mic className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={isLoading || !inputValue.trim()}
+                    size="sm"
+                    className="p-2 h-auto rounded-full bg-foreground text-background hover:bg-foreground/90"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Send className="w-5 h-5" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </>
