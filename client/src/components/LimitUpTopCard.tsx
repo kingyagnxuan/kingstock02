@@ -77,17 +77,17 @@ export default function LimitUpTopCard() {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-2">
+      <CardContent>
         {isLoading ? (
-          <div className="flex items-center justify-center py-8">
+          <div key="loading" className="flex items-center justify-center py-8">
             <div className="text-sm text-muted-foreground">加载中...</div>
           </div>
         ) : topStocks.length === 0 ? (
-          <div className="flex items-center justify-center py-8">
+          <div key="empty" className="flex items-center justify-center py-8">
             <div className="text-sm text-muted-foreground">暂无数据</div>
           </div>
         ) : (
-          <>
+          <div key="content" className="space-y-2">
             {topStocks.map((stock, index) => (
               <div
                 key={stock.code}
@@ -133,14 +133,16 @@ export default function LimitUpTopCard() {
               </div>
             ))}
 
-            <Button
-              variant="outline"
-              className="w-full mt-3"
-              onClick={handleViewAll}
+            <div className="mt-3">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleViewAll}
             >
-              查看全部涨停潜力股
-            </Button>
-          </>
+                查看全部涨停潜力股
+              </Button>
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>
