@@ -1,3 +1,4 @@
+import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
 import HotSectorsCard from "@/components/HotSectorsCard";
 import LimitUpTable from "@/components/LimitUpTable";
@@ -10,6 +11,10 @@ import { mockNotifications, mockMarketNews } from "@/lib/mockCommunityData";
 import { useState } from "react";
 
 export default function Home() {
+  // The userAuth hooks provides authentication state
+  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
+  let { user, loading, error, isAuthenticated, logout } = useAuth();
+
   const { indices, hotSectors, limitUpStocks, report, lastUpdated } = useStockData();
   const [notifications, setNotifications] = useState(mockNotifications);
 

@@ -25,8 +25,9 @@ import Settings from "./pages/Settings";
 import ResearchReports from "./pages/ResearchReports";
 import StockDetail from "./pages/StockDetail";
 import StockSearch from "./pages/StockSearch";
-
+import AskStock from "./pages/AskStock";
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
@@ -44,6 +45,7 @@ function Router() {
       <Route path={"/stock-detail"} component={StockDetail} />
       <Route path={"/stock/:code"} component={StockDetail} />
       <Route path={"/stock-search"} component={StockSearch} />
+      <Route path={"/ask-stock"} component={AskStock} />
       <Route path={"/settings"} component={Settings} />
       <Route path={"/research-reports"} component={ResearchReports} />
       <Route path={"/404"} component={NotFound} />

@@ -23,7 +23,7 @@ export default function TopSearchBar() {
   }, [query]);
 
   const handleSelectStock = (code: string) => {
-    setLocation(`/stock-detail?code=${code}`);
+    setLocation(`/stock/${code}`);
     setQuery("");
     setIsOpen(false);
   };
