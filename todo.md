@@ -195,7 +195,7 @@
 ## 第十九阶段：UI风格优化（完成）
 - [x] 修复首页市场概览卡片背景色
   - [x] 诊断MarketIndexCard和LimitUpTopCard的背景色差异
-  - [x] 将MarketIndexCard背景改为深色渐变（from-slate-900 via-slate-800 to-slate-900）
-  - [x] 调整文本颜色为slate-300/slate-400以适应深色背景
-  - [x] 增强背景光晕效果的可见性
-  - [x] 验证整个页面风格一致性
+  - [x] 将MarketIndexCard背景改为浅色透明（bg-card/30 backdrop-blur-sm）
+  - [x] 将LimitUpTopCard背景改为浅色透明（bg-card/40 backdrop-blur-md）
+  - [x] 调整文本颜色为muted-foreground以保持一致
+  - [x] 验证整个页面风格一致性（不再有过深的背景）

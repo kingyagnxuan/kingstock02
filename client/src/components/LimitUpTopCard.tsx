@@ -56,7 +56,7 @@ export default function LimitUpTopCard() {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 hover:border-slate-600 transition-colors">
+    <Card className="bg-card/40 backdrop-blur-md border-border/40 hover:border-primary/30 transition-colors">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -91,7 +91,7 @@ export default function LimitUpTopCard() {
             {topStocks.map((stock, index) => (
               <div
                 key={stock.code}
-                className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 transition-colors cursor-pointer group"
+                className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
                 onClick={() => handleViewDetails(stock.code)}
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
