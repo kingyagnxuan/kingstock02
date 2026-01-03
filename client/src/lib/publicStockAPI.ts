@@ -39,117 +39,24 @@ export interface StockChartData {
 }
 
 /**
- * 从新浪财经获取A股实时行情
- * 使用新浪财经的公开接口
+ * 从新浪财经获取A股实时行情（已禁用CORS限制）
+ * 注：由于CORS限制，此接口无法从浏览器直接调用
+ * 实际应用中应该使用后端代理或专业API
  */
 export async function getStockQuoteFromSina(code: string): Promise<StockQuote | null> {
-  try {
-    // 新浪财经格式: sh600000 (上海) 或 sz000001 (深圳)
-    const sinaCode = code.startsWith("6") ? `sh${code}` : `sz${code}`;
-    
-    // 使用新浪财经的公开接口
-    const url = `https://hq.sinajs.cn/?list=${sinaCode}&_=${Date.now()}`;
-    
-    const response = await fetch(url);
-    const text = await response.text();
-    
-    // 解析新浪财经返回的数据格式
-    // 格式: var hq_str_sh600000="浦发银行,13.50,13.50,13.47,13.55,13.45,13.47,13.48,2000000,27000000";
-    const match = text.match(/hq_str_[^=]*="([^"]+)"/);
-    
-    if (match && match[1]) {
-      const data = match[1].split(",");
-      
-      if (data.length >= 8) {
-        const name = data[0];
-        const price = parseFloat(data[3]);
-        const open = parseFloat(data[1]);
-        const high = parseFloat(data[4]);
-        const low = parseFloat(data[5]);
-        const volume = parseInt(data[8]) || 0;
-        const previousClose = parseFloat(data[2]);
-        
-        const change = price - previousClose;
-        const changePercent = previousClose !== 0 ? (change / previousClose) * 100 : 0;
-        
-        return {
-          symbol: code,
-          name,
-          price,
-          change,
-          changePercent,
-          open,
-          high,
-          low,
-          volume,
-          marketCap: 0,
-          pe: 0,
-          currency: "CNY",
-          exchange: code.startsWith("6") ? "SSE" : "SZSE"
-        };
-      }
-    }
-  } catch (error) {
-    console.error(`从新浪财经获取${code}行情失败:`, error);
-  }
-
+  // 由于CORS限制，此接口已禁用
+  // 在生产环境中应该使用后端代理或付费API
   return null;
 }
 
 /**
- * 从腾讯财经获取A股实时行情
+ * 从腾讯财经获取A股实时行情（已禁用CORS限制）
+ * 注：由于CORS限制，此接口无法从浏览器直接调用
+ * 实际应用中应该使用后端代理或专业API
  */
 export async function getStockQuoteFromTencent(code: string): Promise<StockQuote | null> {
-  try {
-    // 腾讯财经格式: sh600000 (上海) 或 sz000001 (深圳)
-    const tencentCode = code.startsWith("6") ? `sh${code}` : `sz${code}`;
-    
-    // 使用腾讯财经的公开接口
-    const url = `https://qt.gtimg.cn/q=${tencentCode}`;
-    
-    const response = await fetch(url);
-    const text = await response.text();
-    
-    // 解析腾讯财经返回的数据格式
-    // 格式: v_sh600000="浦发银行 sh600000 13.50 13.50 13.47 13.55 13.45 13.47 13.48 2000000 27000000 ...";
-    const match = text.match(/v_[^=]*="([^"]+)"/);
-    
-    if (match && match[1]) {
-      const data = match[1].split(" ");
-      
-      if (data.length >= 8) {
-        const name = data[0];
-        const price = parseFloat(data[3]);
-        const open = parseFloat(data[4]);
-        const high = parseFloat(data[5]);
-        const low = parseFloat(data[6]);
-        const volume = parseInt(data[9]) || 0;
-        const previousClose = parseFloat(data[2]);
-        
-        const change = price - previousClose;
-        const changePercent = previousClose !== 0 ? (change / previousClose) * 100 : 0;
-        
-        return {
-          symbol: code,
-          name,
-          price,
-          change,
-          changePercent,
-          open,
-          high,
-          low,
-          volume,
-          marketCap: 0,
-          pe: 0,
-          currency: "CNY",
-          exchange: code.startsWith("6") ? "SSE" : "SZSE"
-        };
-      }
-    }
-  } catch (error) {
-    console.error(`从腾讯财经获取${code}行情失败:`, error);
-  }
-
+  // 由于CORS限制，此接口已禁用
+  // 在生产环境中应该使用后端代理或付费API
   return null;
 }
 

@@ -16,7 +16,6 @@ import {
   getMockStockAnalysis,
   getKLineData
 } from "@/lib/mockStockDetail";
-import { getStockQuote, getKLineData as getRealKLineData, getCachedData, setCachedData } from "@/lib/publicStockAPI";
 import type { KLinePeriod } from "@/lib/stockDetailTypes";
 
 export default function StockDetail() {
@@ -24,86 +23,39 @@ export default function StockDetail() {
   const code = new URLSearchParams(location).get("code") || "000001";
   const [klinePeriod, setKlinePeriod] = useState<KLinePeriod>("1d");
   const [loading, setLoading] = useState(false);
-  const [realTimeData, setRealTimeData] = useState<any>(null);
-  const [realKlineData, setRealKlineData] = useState<any[]>([]);
   const { watchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
 
   const isInWatchlist = watchlist.some(w => w.code === code);
 
-  // 加载真实行情数据
-  useEffect(() => {
-    loadRealTimeData();
-    const interval = setInterval(loadRealTimeData, 60000); // 每分钟更新一次
-    return () => clearInterval(interval);
-  }, [code]);
+  // 注：由于CORS限制，外部API无法从浏览器直接调用
+  // 实际应用中应该使用后端代理或付费API
+  // 目前使用模拟数据，保证网站正常运行
 
   // 加载K线数据
   useEffect(() => {
     loadKlineData();
   }, [code, klinePeriod]);
 
-  const loadRealTimeData = async () => {
-    try {
-      const quote = await getStockQuote(code);
-      if (quote) {
-        setRealTimeData(quote);
-      }
-    } catch (error) {
-      console.error("加载实时行情失败:", error);
-    }
-  };
-
   const loadKlineData = async () => {
     setLoading(true);
     try {
-      const cacheKey = `kline_${code}_${klinePeriod}`;
-      const cached = getCachedData(cacheKey);
-      
-      if (cached) {
-        setRealKlineData(cached);
-        setLoading(false);
-        return;
-      }
-
-      const period = klinePeriod === "5m" ? "1d" : klinePeriod === "15m" ? "1d" : klinePeriod === "30m" ? "1d" : klinePeriod === "1h" ? "1d" : (klinePeriod as "1d" | "1w" | "1m");
-      const chartData = await getRealKLineData(code, period, 60);
-      
-      if (chartData && chartData.data.length > 0) {
-        setRealKlineData(chartData.data);
-        setCachedData(cacheKey, chartData.data);
-      } else {
-        // 使用模拟数据
-        const mockData = getKLineData(code, klinePeriod);
-        setRealKlineData(mockData.data);
-      }
+      // 模拟加载延迟
+      await new Promise(resolve => setTimeout(resolve, 300));
+      setLoading(false);
     } catch (error) {
       console.error("加载K线数据失败:", error);
-      const mockData = getKLineData(code, klinePeriod);
-      setRealKlineData(mockData.data);
-    } finally {
       setLoading(false);
     }
   };
 
-  // 使用真实数据或模拟数据
-  const detail = realTimeData ? {
-    ...getMockStockDetail(code),
-    name: realTimeData.name,
-    price: realTimeData.price,
-    change: realTimeData.change,
-    changePercent: realTimeData.changePercent,
-    open: realTimeData.open,
-    high: realTimeData.high,
-    low: realTimeData.low,
-    volume: realTimeData.volume
-  } : getMockStockDetail(code);
-
+  // 使用模拟数据
+  const detail = getMockStockDetail(code);
   const cashFlow = getMockCashFlow(code);
   const fundFlow = getMockFundFlow(code);
   const technicalIndicators = getMockTechnicalIndicators(code);
   const news = getMockStockNews(code);
   const analysis = getMockStockAnalysis(code);
-  const klineData = realKlineData.length > 0 ? realKlineData : getKLineData(code, klinePeriod).data;
+  const klineData = getKLineData(code, klinePeriod).data;
 
   const handleAddToWatchlist = () => {
     if (!isInWatchlist) {
