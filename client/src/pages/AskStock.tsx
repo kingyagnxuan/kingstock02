@@ -10,6 +10,7 @@ import { useState, useRef, useEffect } from "react";
 import { FileList } from "@/components/FileList";
 import { MessageActions } from "@/components/MessageActions";
 import { useAuth } from "@/_core/hooks/useAuth";
+import VoiceControl from "@/components/VoiceControl";
 
 export default function AskStock() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -501,14 +502,17 @@ export default function AskStock() {
                   </div>
                 </div>
                 {message.role === "assistant" && (
-                  <MessageActions
-                    messageId={message.id}
-                    content={message.content}
-                    role="assistant"
-                    onRegenerate={() => handleRegenerateMessage(message.id)}
-                    onShare={() => handleShareMessage(message.id, message.content)}
-                    onFeedback={(type) => handleMessageFeedback(message.id, type)}
-                  />
+                  <div className="space-y-2">
+                    <VoiceControl text={message.content} />
+                    <MessageActions
+                      messageId={message.id}
+                      content={message.content}
+                      role="assistant"
+                      onRegenerate={() => handleRegenerateMessage(message.id)}
+                      onShare={() => handleShareMessage(message.id, message.content)}
+                      onFeedback={(type) => handleMessageFeedback(message.id, type)}
+                    />
+                  </div>
                 )}
               </div>
             ))
@@ -536,7 +540,7 @@ export default function AskStock() {
               placeholder="输入您的问题...（支持拖拽和粘贴图片）"
             />
 
-            {/* 右边操作按钮 */}
+            {/* 右边操作按预 */}
             <div className="flex items-center gap-1">
               <Button
                 onClick={handleFileButtonClick}
@@ -546,6 +550,14 @@ export default function AskStock() {
                 className="p-2 h-auto"
               >
                 <Paperclip className="w-5 h-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-2 h-auto"
+                title="语音输入"
+              >
+                <Mic className="w-5 h-5" />
               </Button>
               <input
                 ref={fileInputRef}
