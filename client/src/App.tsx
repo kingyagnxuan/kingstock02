@@ -28,6 +28,7 @@ import StockSearch from "./pages/StockSearch";
 import AskStock from "./pages/AskStock";
 import DailyLimitUp from "./pages/DailyLimitUp";
 import NextDayLimitUp from "./pages/NextDayLimitUp";
+import SectorDetail from "./pages/SectorDetail";
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -52,6 +53,7 @@ function Router() {
       <Route path={"/research-reports"} component={ResearchReports} />
       <Route path={"/daily-limit-up"} component={DailyLimitUp} />
       <Route path={"/next-day-limit-up"} component={NextDayLimitUp} />
+      <Route path={"/sector/:sector"} component={SectorDetail} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

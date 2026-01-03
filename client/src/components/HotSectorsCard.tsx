@@ -26,7 +26,7 @@ export default function HotSectorsCard({ sectors }: HotSectorsCardProps) {
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         {sectors.map((sector, index) => (
-          <div key={sector.name} className="space-y-2 group">
+          <div key={sector.name} className="space-y-2 group cursor-pointer" onClick={() => setLocation(`/sector/${encodeURIComponent(sector.name)}`)}>
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <span className={cn(
