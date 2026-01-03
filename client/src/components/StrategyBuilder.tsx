@@ -75,37 +75,63 @@ export default function StrategyBuilder({ onClose }: StrategyBuilderProps) {
       return;
     }
 
-    // 模拟AI根据用户输入生成策略因子
-    const aiGeneratedFactors: SelectionFactor[] = [];
-    
-    if (aiPrompt.includes("涨停") || aiPrompt.includes("追涨")) {
-      aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["tech-limit-up"], value: true });
-      aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["sentiment-hot"], value: true });
-    }
-    
-    if (aiPrompt.includes("低估") || aiPrompt.includes("价值")) {
-      aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-pe"], value: [10, 25] });
-      aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-pb"], value: [0.5, 2] });
-    }
-    
-    if (aiPrompt.includes("成长") || aiPrompt.includes("高增长")) {
-      aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-growth"], value: "high" });
-      aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-roe"], value: [15, 100] });
-    }
-    
-    if (aiPrompt.includes("AI") || aiPrompt.includes("科技")) {
-      aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["sentiment-hot"], value: true });
-    }
+    try {
+      const aiGeneratedFactors: SelectionFactor[] = [];
+      
+      if (aiPrompt.includes("涨停") || aiPrompt.includes("追涨")) {
+        if (PREDEFINED_FACTORS["tech-limit-up"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["tech-limit-up"], value: true });
+        }
+        if (PREDEFINED_FACTORS["sentiment-hot"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["sentiment-hot"], value: true });
+        }
+      }
+      
+      if (aiPrompt.includes("低估") || aiPrompt.includes("价值")) {
+        if (PREDEFINED_FACTORS["fund-pe"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-pe"], value: [10, 25] });
+        }
+        if (PREDEFINED_FACTORS["fund-pb"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-pb"], value: [0.5, 2] });
+        }
+      }
+      
+      if (aiPrompt.includes("成长") || aiPrompt.includes("高增长")) {
+        if (PREDEFINED_FACTORS["fund-growth"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-growth"], value: "high" });
+        }
+        if (PREDEFINED_FACTORS["fund-roe"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-roe"], value: [15, 100] });
+        }
+      }
+      
+      if (aiPrompt.includes("AI") || aiPrompt.includes("科技")) {
+        if (PREDEFINED_FACTORS["sentiment-hot"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["sentiment-hot"], value: true });
+        }
+      }
 
-    if (aiGeneratedFactors.length === 0) {
-      // 默认生成基础策略
-      aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["tech-volume"], value: [10, 100] });
-      aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-growth"], value: "medium" });
-    }
+      if (aiGeneratedFactors.length === 0) {
+        if (PREDEFINED_FACTORS["tech-volume"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["tech-volume"], value: [10, 100] });
+        }
+        if (PREDEFINED_FACTORS["fund-growth"]) {
+          aiGeneratedFactors.push({ ...PREDEFINED_FACTORS["fund-growth"], value: "medium" });
+        }
+      }
 
-    setSelectedFactors(aiGeneratedFactors);
-    setStrategyName(`AI生成策略-${new Date().toLocaleTimeString()}`);
-    setActiveTab("manual");
+      if (aiGeneratedFactors.length > 0) {
+        setSelectedFactors(aiGeneratedFactors);
+        setStrategyName(`AI生成策略-${new Date().toLocaleTimeString()}`);
+        setActiveTab("manual");
+        alert(`成功生成${aiGeneratedFactors.length}个策略因子`);
+      } else {
+        alert("未能生成策略因子，请检查输入内容");
+      }
+    } catch (error) {
+      console.error("AI生成策略失败:", error);
+      alert("生成策略时出错，请重试");
+    }
   };
 
   const renderFactorInput = (factor: SelectionFactor) => {
