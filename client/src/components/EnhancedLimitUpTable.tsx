@@ -80,12 +80,12 @@ export default function EnhancedLimitUpTable({ stocks }: EnhancedLimitUpTablePro
 
         {/* Filters and Sorting */}
         <div className="flex flex-wrap gap-3">
-          <Select value={filterConfig.sector || ""} onValueChange={(value) => setFilterConfig({ ...filterConfig, sector: value || undefined })}>
+          <Select value={filterConfig.sector || "all"} onValueChange={(value) => setFilterConfig({ ...filterConfig, sector: value === "all" ? undefined : value })}>
             <SelectTrigger className="w-[150px] h-9 text-sm">
               <SelectValue placeholder="筛选板块" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">全部板块</SelectItem>
+              <SelectItem value="all">全部板块</SelectItem>
               {sectors.map(sector => (
                 <SelectItem key={sector} value={sector}>{sector}</SelectItem>
               ))}
