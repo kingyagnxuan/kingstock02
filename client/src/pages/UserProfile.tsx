@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { User, LogOut, Edit2, Trophy, MessageSquare, Heart, Users, X, Check, Upload, Copy, Crown, Gift, Link as LinkIcon, Calendar } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -16,8 +16,17 @@ export default function UserProfile() {
   const [, setLocation] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [paymentEnabled, setPaymentEnabled] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const updateUserMutation = trpc.users.updateProfile.useMutation();
+  const configQuery = trpc.system.getConfig.useQuery();
+
+  // 获取配置
+  useEffect(() => {
+    if (configQuery.data?.paymentEnabled !== undefined) {
+      setPaymentEnabled(configQuery.data.paymentEnabled);
+    }
+  }, [configQuery.data]);
 
   // 编辑表单状态
   const [formData, setFormData] = useState({
@@ -34,11 +43,11 @@ export default function UserProfile() {
 
   // 模拟数据（实际应从后端获取）
   const mockSubscription = {
-    planType: "monthly", // "free" | "monthly" | "yearly"
+    planType: "free", // 前期所有用户都是免费用户
     status: "active",
-    startDate: new Date("2024-01-01"),
-    endDate: new Date("2024-02-01"),
-    autoRenew: true,
+    startDate: new Date(),
+    endDate: null,
+    autoRenew: false,
   };
 
   const mockInvitation = {
@@ -88,7 +97,7 @@ export default function UserProfile() {
     },
   ];
 
-  const isPremium = mockSubscription.planType !== "free";
+  const isPremium = false; // 前期所有用户都是免费用户
   const premiumFeatures = [
     "✓ 高级股票分析",
     "✓ AI问票服务",
@@ -232,12 +241,10 @@ export default function UserProfile() {
                   <>
                     <div className="flex items-center gap-2 mb-2">
                       <h1 className="text-3xl font-bold">{user.name || user.openId}</h1>
-                      {isPremium && (
-                        <Badge className="bg-yellow-500/20 text-yellow-500 border-yellow-500/20 gap-1">
-                          <Crown className="w-3 h-3" />
-                          VIP用户
-                        </Badge>
-                      )}
+                      <Badge className="bg-blue-500/20 text-blue-500 border-blue-500/20 gap-1">
+                        <Users className="w-3 h-3" />
+                        免费用户
+                      </Badge>
                     </div>
                     <p className="text-muted-foreground mb-3">{(user as any)?.bio || "暂无签名"}</p>
                   </>
@@ -313,70 +320,46 @@ export default function UserProfile() {
           )}
         </div>
 
-        {/* Subscription Status */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="bg-card/40 backdrop-blur-md border-border/50 lg:col-span-2">
-            <CardHeader className="border-b border-border/50 pb-4">
-              <CardTitle className="text-lg font-bold flex items-center gap-2">
-                <Crown className="w-5 h-5 text-yellow-500" />
-                账户信息
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              {/* Subscription Status */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold">订阅状态</h3>
-                  <Badge className={isPremium ? "bg-yellow-500/20 text-yellow-500 border-yellow-500/20" : "bg-gray-500/20 text-gray-500 border-gray-500/20"}>
-                    {isPremium ? "VIP会员" : "免费用户"}
-                  </Badge>
-                </div>
-                {isPremium && (
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">套餐类型：</span>
-                      <span className="font-medium">
-                        {mockSubscription.planType === "monthly" ? "月度套餐" : "年度套餐"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">生效日期：</span>
-                      <span className="font-medium">{mockSubscription.startDate.toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">过期日期：</span>
-                      <span className="font-medium">{mockSubscription.endDate.toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">自动续费：</span>
-                      <span className="font-medium">{mockSubscription.autoRenew ? "已启用" : "已关闭"}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
+        {/* Account Information */}
+        <Card className="bg-card/40 backdrop-blur-md border-border/50">
+          <CardHeader className="border-b border-border/50 pb-4">
+            <CardTitle className="text-lg font-bold flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              账户信息
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">账户类型</span>
+              <Badge className="bg-blue-500/20 text-blue-500 border-blue-500/20">免费用户</Badge>
+            </div>
+            <div className="h-px bg-border/50" />
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">邮箱</span>
+              <span className="text-sm font-mono">{user.email}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">加入时间</span>
+              <span className="text-sm">{user.createdAt.toLocaleDateString()}</span>
+            </div>
+            {paymentEnabled && (
+              <>
+                <div className="h-px bg-border/50" />
+                <Button className="w-full bg-yellow-600 hover:bg-yellow-700">
+                  升级到VIP
+                </Button>
+              </>
+            )}
+          </CardContent>
+        </Card>
 
-              <div className="h-px bg-border/50" />
-
-              {/* Email & Join Date */}
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">邮箱</p>
-                  <p className="text-sm font-mono">{user.email}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">加入时间</p>
-                  <p className="text-sm">{user.createdAt.toLocaleDateString()}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Premium Features */}
+        {/* Premium Features - Only show if payment is enabled */}
+        {paymentEnabled && (
           <Card className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-yellow-500/20">
             <CardHeader className="border-b border-yellow-500/20 pb-4">
               <CardTitle className="text-lg font-bold flex items-center gap-2">
                 <Gift className="w-5 h-5 text-yellow-500" />
-                {isPremium ? "VIP特权" : "升级特权"}
+                VIP特权
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -387,162 +370,161 @@ export default function UserProfile() {
                   </div>
                 ))}
               </div>
-              {!isPremium && (
-                <Button className="w-full mt-4 bg-yellow-600 hover:bg-yellow-700">
-                  升级到VIP
-                </Button>
-              )}
             </CardContent>
           </Card>
-        </div>
+        )}
 
-        {/* Invitation Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Invitation Link */}
-          <Card className="bg-card/40 backdrop-blur-md border-border/50">
-            <CardHeader className="border-b border-border/50 pb-4">
-              <CardTitle className="text-lg font-bold flex items-center gap-2">
-                <LinkIcon className="w-5 h-5 text-primary" />
-                专属邀请链接
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div>
-                <p className="text-xs text-muted-foreground mb-2">邀请码</p>
-                <div className="flex gap-2">
-                  <Input
-                    value={mockInvitation.code}
-                    readOnly
-                    className="font-mono text-sm"
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleCopyCode}
-                    className="gap-1"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs text-muted-foreground mb-2">邀请链接</p>
-                <div className="flex gap-2">
-                  <Input
-                    value={mockInvitation.link}
-                    readOnly
-                    className="text-sm"
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleCopyLink}
-                    className="gap-1"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="h-px bg-border/50" />
-
-              {/* Invitation Stats */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-primary">{mockInvitation.totalInvites}</p>
-                  <p className="text-xs text-muted-foreground">总邀请数</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-green-500">{mockInvitation.completedInvites}</p>
-                  <p className="text-xs text-muted-foreground">已完成</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-yellow-500">{mockInvitation.pointsEarned}</p>
-                  <p className="text-xs text-muted-foreground">获得积分</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Invitation Stats Card */}
-          <Card className="bg-card/40 backdrop-blur-md border-border/50">
-            <CardHeader className="border-b border-border/50 pb-4">
-              <CardTitle className="text-lg font-bold flex items-center gap-2">
-                <Users className="w-5 h-5 text-primary" />
-                邀请奖励
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
-                  <span className="text-sm text-muted-foreground">每次邀请奖励</span>
-                  <span className="font-bold text-primary">50积分</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
-                  <span className="text-sm text-muted-foreground">被邀请者奖励</span>
-                  <span className="font-bold text-primary">20积分</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
-                  <span className="text-sm text-muted-foreground">邀请VIP用户</span>
-                  <span className="font-bold text-yellow-500">100积分</span>
-                </div>
-              </div>
-
-              <div className="h-px bg-border/50" />
-
-              <div className="text-sm text-muted-foreground">
-                <p className="mb-2">💡 邀请提示：</p>
-                <ul className="space-y-1 text-xs">
-                  <li>• 分享链接给朋友，邀请他们注册</li>
-                  <li>• 被邀请者完成注册后即可获得奖励</li>
-                  <li>• 积分可用于购买VIP或兑换特权</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Invitation Records */}
-        <Card className="bg-card/40 backdrop-blur-md border-border/50">
-          <CardHeader className="border-b border-border/50 pb-4">
-            <CardTitle className="text-lg font-bold">邀请记录</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="space-y-3">
-              {mockInvitationRecords.map((record) => (
-                <div
-                  key={record.id}
-                  className="flex items-center justify-between p-4 bg-background/50 rounded-lg border border-border/30"
-                >
-                  <div className="flex-1">
-                    <p className="font-medium">{record.inviteeName}</p>
-                    {record.completedAt && (
-                      <p className="text-xs text-muted-foreground">
-                        <Calendar className="w-3 h-3 inline mr-1" />
-                        {record.completedAt.toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Badge
-                      className={
-                        record.status === "completed"
-                          ? "bg-green-500/20 text-green-500 border-green-500/20"
-                          : "bg-yellow-500/20 text-yellow-500 border-yellow-500/20"
-                      }
+        {/* Invitation Section - Only show if payment is enabled */}
+        {paymentEnabled && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Invitation Link */}
+            <Card className="bg-card/40 backdrop-blur-md border-border/50">
+              <CardHeader className="border-b border-border/50 pb-4">
+                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                  <LinkIcon className="w-5 h-5 text-primary" />
+                  专属邀请链接
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">邀请码</p>
+                  <div className="flex gap-2">
+                    <Input
+                      value={mockInvitation.code}
+                      readOnly
+                      className="font-mono text-sm"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCopyCode}
+                      className="gap-1"
                     >
-                      {record.status === "completed" ? "已完成" : "待完成"}
-                    </Badge>
-                    {record.pointsRewarded > 0 && (
-                      <span className="font-bold text-primary">+{record.pointsRewarded}积分</span>
-                    )}
+                      <Copy className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">邀请链接</p>
+                  <div className="flex gap-2">
+                    <Input
+                      value={mockInvitation.link}
+                      readOnly
+                      className="text-sm"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCopyLink}
+                      className="gap-1"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="h-px bg-border/50" />
+
+                {/* Invitation Stats */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-primary">{mockInvitation.totalInvites}</p>
+                    <p className="text-xs text-muted-foreground">总邀请数</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-500">{mockInvitation.completedInvites}</p>
+                    <p className="text-xs text-muted-foreground">已完成</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-yellow-500">{mockInvitation.pointsEarned}</p>
+                    <p className="text-xs text-muted-foreground">获得积分</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Invitation Stats Card */}
+            <Card className="bg-card/40 backdrop-blur-md border-border/50">
+              <CardHeader className="border-b border-border/50 pb-4">
+                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                  <Users className="w-5 h-5 text-primary" />
+                  邀请奖励
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
+                    <span className="text-sm text-muted-foreground">每次邀请奖励</span>
+                    <span className="font-bold text-primary">50积分</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
+                    <span className="text-sm text-muted-foreground">被邀请者奖励</span>
+                    <span className="font-bold text-primary">20积分</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
+                    <span className="text-sm text-muted-foreground">邀请VIP用户</span>
+                    <span className="font-bold text-yellow-500">100积分</span>
+                  </div>
+                </div>
+
+                <div className="h-px bg-border/50" />
+
+                <div className="text-sm text-muted-foreground">
+                  <p className="mb-2">💡 邀请提示：</p>
+                  <ul className="space-y-1 text-xs">
+                    <li>• 分享链接给朋友，邀请他们注册</li>
+                    <li>• 被邀请者完成注册后即可获得奖励</li>
+                    <li>• 积分可用于购买VIP或兑换特权</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Invitation Records - Only show if payment is enabled */}
+        {paymentEnabled && (
+          <Card className="bg-card/40 backdrop-blur-md border-border/50">
+            <CardHeader className="border-b border-border/50 pb-4">
+              <CardTitle className="text-lg font-bold">邀请记录</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-3">
+                {mockInvitationRecords.map((record) => (
+                  <div
+                    key={record.id}
+                    className="flex items-center justify-between p-4 bg-background/50 rounded-lg border border-border/30"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium">{record.inviteeName}</p>
+                      {record.completedAt && (
+                        <p className="text-xs text-muted-foreground">
+                          <Calendar className="w-3 h-3 inline mr-1" />
+                          {record.completedAt.toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Badge
+                        className={
+                          record.status === "completed"
+                            ? "bg-green-500/20 text-green-500 border-green-500/20"
+                            : "bg-yellow-500/20 text-yellow-500 border-yellow-500/20"
+                        }
+                      >
+                        {record.status === "completed" ? "已完成" : "待完成"}
+                      </Badge>
+                      {record.pointsRewarded > 0 && (
+                        <span className="font-bold text-primary">+{record.pointsRewarded}积分</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );

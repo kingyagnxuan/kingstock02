@@ -248,3 +248,16 @@ export const pushLogs = mysqlTable("pushLogs", {
 
 export type PushLog = typeof pushLogs.$inferSelect;
 export type InsertPushLog = typeof pushLogs.$inferInsert;
+
+// 系统配置表
+export const systemConfig = mysqlTable("systemConfig", {
+  id: int("id").autoincrement().primaryKey(),
+  key: varchar("key", { length: 100 }).notNull().unique(), // 配置键
+  value: text("value").notNull(), // 配置值（JSON格式）
+  description: text("description"), // 配置描述
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  updatedBy: int("updatedBy"), // 更新者ID（管理员）
+});
+
+export type SystemConfig = typeof systemConfig.$inferSelect;
+export type InsertSystemConfig = typeof systemConfig.$inferInsert;
