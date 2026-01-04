@@ -36,6 +36,9 @@ import { Invitations } from "./pages/Invitations";
 import { Subscription } from "./pages/Subscription";
 import { PushManagement } from "./pages/PushManagement";
 import WelcomeGuide from "./pages/WelcomeGuide";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminSettings from "./pages/admin/AdminSettings";
+import AdminUsers from "./pages/admin/AdminUsers";
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -67,6 +70,9 @@ function Router() {
       <Route path={"/invitations"} component={Invitations} />
       <Route path={"/subscription"} component={Subscription} />
       <Route path={"/push-management"} component={PushManagement} />
+      <Route path={"/admin/dashboard"} component={AdminDashboard} />
+      <Route path={"/admin/settings"} component={AdminSettings} />
+      <Route path={"/admin/users"} component={AdminUsers} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
