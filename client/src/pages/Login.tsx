@@ -1,37 +1,37 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/AuthContext";
-import { useLocation } from "wouter";
-import { useState } from "react";
-import { AlertCircle, Loader2, QrCode, Smartphone } from "lucide-react";
+import { getLoginUrl } from "@/const";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { useEffect } from "react";
 
 export default function Login() {
-  const [, setLocation] = useLocation();
-  const { login, isLoading, error } = useAuth();
-  const [email, setEmail] = useState("demo@example.com");
-  const [password, setPassword] = useState("password");
-  const [isRegister, setIsRegister] = useState(false);
-  const [username, setUsername] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const { user, loading } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (isRegister) {
-      // 注册逻辑
-      if (!username || !email || !password || !confirmPassword) {
-        return;
-      }
-    } else {
-      // 登录逻辑
-      await login({ email, password });
-      if (!error) {
-        setLocation("/");
-      }
+  // 如果已登录，重定向到首页
+  useEffect(() => {
+    if (user && !loading) {
+      window.location.href = "/";
     }
+  }, [user, loading]);
+
+  const handleManusSSOLogin = () => {
+    // 使用Manus OAuth登录
+    window.location.href = getLoginUrl();
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-card/40 backdrop-blur-md border-border/50">
+          <CardContent className="flex items-center justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
@@ -44,141 +44,37 @@ export default function Login() {
           </div>
           <CardTitle className="text-2xl font-bold">StockTracker</CardTitle>
           <p className="text-sm text-muted-foreground">
-            {isRegister ? "创建新账户" : "登录您的账户"}
+            股票投资专家
           </p>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {error && (
-            <Alert className="bg-destructive/10 border-destructive/50">
-              <AlertCircle className="h-4 w-4 text-destructive" />
-              <AlertDescription className="text-destructive">
-                {error}
-              </AlertDescription>
-            </Alert>
-          )}
+          <Alert className="bg-blue-500/10 border-blue-500/30">
+            <AlertCircle className="h-4 w-4 text-blue-500" />
+            <AlertDescription className="text-blue-500">
+              使用Manus账户登录以访问所有功能
+            </AlertDescription>
+          </Alert>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {isRegister && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">用户名</label>
-                <Input
-                  placeholder="输入用户名"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-            )}
+          <Button
+            onClick={handleManusSSOLogin}
+            className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white font-medium py-2 rounded-lg transition-all"
+          >
+            <span>通过Manus登录</span>
+          </Button>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">邮箱</label>
-              <Input
-                type="email"
-                placeholder="输入邮箱地址"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">密码</label>
-              <Input
-                type="password"
-                placeholder="输入密码"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-
-            {isRegister && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">确认密码</label>
-                <Input
-                  type="password"
-                  placeholder="再次输入密码"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  处理中...
-                </>
-              ) : (
-                isRegister ? "创建账户" : "登录"
-              )}
-            </Button>
-          </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border/50" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-card text-muted-foreground">或</span>
-            </div>
+          <div className="text-center text-xs text-muted-foreground">
+            <p>首次登录会自动创建账户</p>
           </div>
 
-          {/* 微信登录选项 */}
-          <div className="space-y-3">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full border-green-500/30 hover:bg-green-500/5"
-              onClick={() => {
-                // 微信扫码登录逻辑
-                window.location.href = `${import.meta.env.VITE_OAUTH_PORTAL_URL}?client_id=${import.meta.env.VITE_APP_ID}&redirect_uri=${window.location.origin}/auth/wechat&response_type=code&scope=snsapi_login&state=wechat_scan`;
-              }}
-            >
-              <QrCode className="w-4 h-4 mr-2 text-green-500" />
-              <span className="text-green-600">微信扫码登录</span>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full border-green-500/30 hover:bg-green-500/5"
-              onClick={() => {
-                // 微信一键登录逻辑
-                window.location.href = `${import.meta.env.VITE_OAUTH_PORTAL_URL}?client_id=${import.meta.env.VITE_APP_ID}&redirect_uri=${window.location.origin}/auth/wechat&response_type=code&scope=snsapi_userinfo&state=wechat_quick`;
-              }}
-            >
-              <Smartphone className="w-4 h-4 mr-2 text-green-500" />
-              <span className="text-green-600">微信一键登录</span>
-            </Button>
+          <div className="bg-muted/30 rounded-lg p-4 text-xs text-muted-foreground space-y-2">
+            <p className="font-medium text-foreground">关于登录：</p>
+            <ul className="space-y-1 list-disc list-inside">
+              <li>点击上方按钮使用Manus账户登录</li>
+              <li>首次登录会自动为您创建StockTracker账户</li>
+              <li>您的所有数据都会安全保存</li>
+            </ul>
           </div>
-
-          <div className="space-y-2">
-            <p className="text-sm text-center text-muted-foreground">
-              {isRegister ? "已有账户？" : "还没有账户？"}
-              <button
-                type="button"
-                onClick={() => setIsRegister(!isRegister)}
-                className="text-primary hover:underline font-medium ml-1"
-              >
-                {isRegister ? "立即登录" : "创建新账户"}
-              </button>
-            </p>
-          </div>
-
-          {!isRegister && (
-            <div className="bg-muted/30 rounded-lg p-3 text-xs text-muted-foreground space-y-1">
-              <p className="font-medium">演示账户：</p>
-              <p>邮箱: demo@example.com</p>
-              <p>密码: password</p>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
