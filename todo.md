@@ -826,3 +826,40 @@
   - [x] 验证管理员可以升级/降级其他用户
   - [x] 验证权限控制
   - [x] 验证日志记录
+
+## 第四十阶段：Web应用版本1.1发布（进行中）
+- [ ] 创建版本1.1发布检查点
+- [ ] 标记版本号为1.1
+- [ ] 发布到Manus平台
+
+## 第四十一阶段：Capacitor安卓App版本2.1（进行中）
+- [ ] 安装Capacitor CLI
+- [ ] 初始化Capacitor项目
+- [ ] 配置应用信息
+  - [ ] 应用名称：StockTracker
+  - [ ] 应用ID：com.stocktracker.app
+  - [ ] 版本号：2.1
+  - [ ] 构建版本：1
+- [ ] 安装Android平台
+- [ ] 配置Android Studio环境
+- [ ] 构建生产版本
+- [ ] 生成APK/AAB文件
+- [ ] 测试安卓App
+- [ ] 优化App大小和性能
+
+## 第四十二阶段：GitHub Actions自动化构建（进行中）
+- [ ] 创建.github/workflows目录
+- [ ] 创建build-android.yml工作流文件
+- [ ] 配置签名密钥存储
+- [ ] 配置GitHub Secrets
+- [ ] 测试自动化构建
+- [ ] 生成APK/AAB文件
+- [ ] 上传到Release页面
+## 第四十二阶段：GitHub Actions自动化构建（完成）
+- [x] 创建.github/workflows目录
+- [x] 创建build-android.yml工作流文件
+- [x] 创建Android构建配置文件
+- [x] 创建.gitignore配置
+- [x] 创建构建文档
+- [x] 配置GitHub Secrets说明
+- [x] 准备自动化构建流程

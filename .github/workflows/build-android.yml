@@ -1,0 +1,104 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web app
+        run: pnpm build
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Add Android platform to Capacitor
+        run: pnpm exec cap add android
+
+      - name: Build Android APK (Debug)
+        if: github.event.inputs.build_type != 'release' && github.event_name != 'workflow_dispatch'
+        run: |
+          cd android
+          ./gradlew assembleDebug
+          
+      - name: Build Android APK (Release)
+        if: github.event.inputs.build_type == 'release'
+        run: |
+          cd android
+          ./gradlew assembleRelease
+
+      - name: Build Android APK (Default)
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          cd android
+          ./gradlew assembleDebug
+
+      - name: Upload APK to artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/bundle/release/app-release.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to GitHub Release
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          tag_name: v2.1.0-${{ github.run_number }}
+          body: |
+            StockTracker Android App v2.1
+            Build: ${{ github.run_number }}
+            Commit: ${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
