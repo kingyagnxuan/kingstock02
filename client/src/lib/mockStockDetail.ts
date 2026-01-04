@@ -228,8 +228,6 @@ export function searchStocks(query: string): Array<{ code: string; name: string;
     { code: "000333", name: "美的集团", pinyin: "mdjt" },
     { code: "000858", name: "五粮液", pinyin: "wly" },
     { code: "000651", name: "格力电器", pinyin: "gldq" },
-    { code: "000858", name: "五粮液", pinyin: "wly" },
-    { code: "000858", name: "五粮液", pinyin: "wly" },
     // 其他热门股票
     { code: "600000", name: "浦发银行", pinyin: "pfyh" },
     { code: "600016", name: "民生银行", pinyin: "msyh" },
@@ -241,8 +239,8 @@ export function searchStocks(query: string): Array<{ code: string; name: string;
     { code: "600900", name: "长江电力", pinyin: "cjdl" },
     { code: "601398", name: "工商银行", pinyin: "gsyh" },
     { code: "601939", name: "建设银行", pinyin: "jsyh" },
-    { code: "600363", name: "中国海防", pinyin: "zghf" },
-    { code: "300058", name: "掌阅科技", pinyin: "zykj" }
+    { code: "600764", name: "中国海防", pinyin: "zghf" },
+    { code: "300089", name: "掌阅科技", pinyin: "zykj" }
   ];
 
   const lowerQuery = query.toLowerCase();
