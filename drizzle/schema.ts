@@ -19,6 +19,9 @@ export const users = mysqlTable("users", {
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   wechatId: varchar("wechatId", { length: 100 }), // 微信ID
   phoneNumber: varchar("phoneNumber", { length: 20 }), // 手机号
+  avatar: varchar("avatar", { length: 500 }), // 头像URL
+  bio: varchar("bio", { length: 200 }), // 个人签名
+  biography: text("biography"), // 个人资料/简介
   welcomeGuideCompleted: boolean("welcomeGuideCompleted").default(false).notNull(), // 是否完成欢迎引导
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

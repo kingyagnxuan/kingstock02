@@ -2,6 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
+import { z } from "zod";
 import { getDb, getUserByOpenId } from "./db";
 import { users } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
@@ -25,6 +26,30 @@ export const appRouter = router({
     }),
   }),
   users: router({
+    updateProfile: protectedProcedure
+      .input(z.object({
+        name: z.string().optional(),
+        avatar: z.string().optional(),
+        bio: z.string().max(200).optional(),
+        biography: z.string().max(500).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (!ctx.user?.id) {
+          throw new Error("User not authenticated");
+        }
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        await db.update(users).set({
+          name: input.name,
+          avatar: input.avatar,
+          bio: input.bio,
+          biography: input.biography,
+          updatedAt: new Date()
+        }).where(eq(users.id, ctx.user.id));
+        
+        return { success: true };
+      }),
     markWelcomeGuideCompleted: protectedProcedure.mutation(async ({ ctx }) => {
       if (!ctx.user?.id) {
         throw new Error("User not authenticated");
