@@ -50,6 +50,13 @@
       "when": 1767498583473,
       "tag": "0006_fluffy_supreme_intelligence",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1767499781245,
+      "tag": "0007_mixed_puma",
+      "breakpoints": true
     }
   ]
 }

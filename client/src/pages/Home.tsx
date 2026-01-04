@@ -8,15 +8,24 @@ import { AlertTriangle, TrendingUp } from "lucide-react";
 import NotificationCenter from "@/components/NotificationCenter";
 import MarketNewsAndQuotes from "@/components/MarketNewsAndQuotes";
 import { mockNotifications, mockMarketNews } from "@/lib/mockCommunityData";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 
 export default function Home() {
   // The userAuth hooks provides authentication state
   // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
   let { user, loading, error, isAuthenticated, logout } = useAuth();
+  const [, setLocation] = useLocation();
 
   const { indices, hotSectors, limitUpStocks, report, lastUpdated } = useStockData();
   const [notifications, setNotifications] = useState(mockNotifications);
+
+  // 检测首次登录并重定向到欢迎引导页面
+  useEffect(() => {
+    if (user && !loading && !user.welcomeGuideCompleted) {
+      setLocation("/welcome-guide");
+    }
+  }, [user, loading, setLocation]);
 
   const handleMarkAsRead = (id: string) => {
     setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
@@ -25,6 +34,33 @@ export default function Home() {
   const handleClearNotifications = () => {
     setNotifications([]);
   };
+
+  // 如果正在加载或需要重定向到欢迎引导，显示加载状态
+  if (loading || (user && !user.welcomeGuideCompleted)) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <p className="mt-4 text-muted-foreground">加载中...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // 如果未登录，显示登录提示
+  if (!isAuthenticated) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <p className="text-muted-foreground">请登录以继续</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

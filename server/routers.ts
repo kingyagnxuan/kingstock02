@@ -1,7 +1,10 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
+import { getDb, getUserByOpenId } from "./db";
+import { users } from "../drizzle/schema";
+import { eq } from "drizzle-orm";
 import { marketRouter } from "./routers/market";
 import { aiRouter } from "./routers/ai";
 import { filesRouter } from "./routers/files";
@@ -19,6 +22,22 @@ export const appRouter = router({
       return {
         success: true,
       } as const;
+    }),
+  }),
+  users: router({
+    markWelcomeGuideCompleted: protectedProcedure.mutation(async ({ ctx }) => {
+      if (!ctx.user?.id) {
+        throw new Error("User not authenticated");
+      }
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      
+      await db.update(users).set({
+        welcomeGuideCompleted: true,
+        updatedAt: new Date()
+      }).where(eq(users.id, ctx.user.id));
+      
+      return { success: true };
     }),
   }),
   market: marketRouter,

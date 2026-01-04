@@ -35,11 +35,12 @@ import NewsDetail from "./pages/NewsDetail";
 import { Invitations } from "./pages/Invitations";
 import { Subscription } from "./pages/Subscription";
 import { PushManagement } from "./pages/PushManagement";
+import WelcomeGuide from "./pages/WelcomeGuide";
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
+    <Switch>      <Route path={"/"} component={Home} />
+      <Route path={"/welcome-guide"} component={WelcomeGuide} />
       <Route path={"/limit-up"} component={LimitUp} />
       <Route path={"/watchlist"} component={WatchlistEnhanced} />
       <Route path={"/analytics"} component={Analytics} />
