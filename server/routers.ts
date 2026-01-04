@@ -6,6 +6,7 @@ import { marketRouter } from "./routers/market";
 import { aiRouter } from "./routers/ai";
 import { filesRouter } from "./routers/files";
 import { limitUpRouter } from "./routers/limitUp";
+import { invitationsRouter } from "./routers/invitations";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -24,6 +25,7 @@ export const appRouter = router({
   ai: aiRouter,
   files: filesRouter,
   limitUp: limitUpRouter,
+  invitations: invitationsRouter,
 });
 
 export type AppRouter = typeof appRouter;

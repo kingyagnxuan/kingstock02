@@ -32,6 +32,9 @@ import SectorDetail from "./pages/SectorDetail";
 import StrategyDetail from "./pages/StrategyDetail";
 import DiscussionDetail from "./pages/DiscussionDetail";
 import NewsDetail from "./pages/NewsDetail";
+import { Invitations } from "./pages/Invitations";
+import { Subscription } from "./pages/Subscription";
+import { PushManagement } from "./pages/PushManagement";
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -60,6 +63,9 @@ function Router() {
       <Route path={"/sector/:sector"} component={SectorDetail} />
       <Route path={"/discussion/:id"} component={DiscussionDetail} />
       <Route path={"/news/:id"} component={NewsDetail} />
+      <Route path={"/invitations"} component={Invitations} />
+      <Route path={"/subscription"} component={Subscription} />
+      <Route path={"/push-management"} component={PushManagement} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

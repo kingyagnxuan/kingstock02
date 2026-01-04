@@ -4,19 +4,45 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { automatedTradingEngine } from "@/lib/automatedTrading";
 import { useStrategy } from "@/contexts/StrategyContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AlertCircle, CheckCircle, Clock, TrendingUp, TrendingDown, Zap, AlertTriangle } from "lucide-react";
+
+// 示例股票数据
+const SAMPLE_STOCKS = [
+  { code: "300058", name: "蓝色光标", price: 12.45 },
+  { code: "600363", name: "联创光电", price: 38.88 },
+  { code: "300516", name: "久之洋", price: 42.60 },
+  { code: "002131", name: "利欧股份", price: 3.52 },
+  { code: "601698", name: "中国卫通", price: 22.15 },
+  { code: "000001", name: "平安银行", price: 12.50 },
+  { code: "000333", name: "美的集团", price: 35.80 },
+  { code: "000002", name: "万科A", price: 15.30 }
+];
 
 export default function AutomatedTrading() {
   const { strategies } = useStrategy();
   const [selectedStrategy, setSelectedStrategy] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"signals" | "orders" | "portfolio" | "alerts">("signals");
+  const [signalsGenerated, setSignalsGenerated] = useState(false);
 
   const strategy = selectedStrategy ? strategies.find(s => s.id === selectedStrategy) : null;
   const signals = selectedStrategy ? automatedTradingEngine.getPendingSignals(selectedStrategy) : [];
   const portfolio = selectedStrategy ? automatedTradingEngine.getPortfolioStatus(selectedStrategy) : null;
   const alerts = selectedStrategy ? automatedTradingEngine.getRiskAlerts(selectedStrategy) : [];
   const tradeHistory = selectedStrategy ? automatedTradingEngine.getTradeHistory(selectedStrategy) : [];
+
+  // 当选择策略时，自动生成交易信号
+  useEffect(() => {
+    if (selectedStrategy && strategy && !signalsGenerated) {
+      automatedTradingEngine.generateSignals(strategy, SAMPLE_STOCKS);
+      setSignalsGenerated(true);
+    }
+  }, [selectedStrategy, strategy, signalsGenerated]);
+
+  const handleStrategyChange = (strategyId: string) => {
+    setSelectedStrategy(strategyId);
+    setSignalsGenerated(false); // 重置信号生成标志
+  };
 
   const handleExecuteSignal = (signalId: string) => {
     automatedTradingEngine.executeSignal(signalId);
@@ -51,7 +77,7 @@ export default function AutomatedTrading() {
                 <Button
                   key={s.id}
                   variant={selectedStrategy === s.id ? "default" : "outline"}
-                  onClick={() => setSelectedStrategy(s.id)}
+                  onClick={() => handleStrategyChange(s.id)}
                 >
                   {s.name}
                 </Button>

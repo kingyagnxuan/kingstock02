@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -17,9 +17,11 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  wechatId: varchar("wechatId", { length: 100 }), // 微信ID
+  phoneNumber: varchar("phoneNumber", { length: 20 }), // 手机号
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-  lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
+  lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull()
 });
 
 export type User = typeof users.$inferSelect;
@@ -154,3 +156,91 @@ export const nextDayLimitUpPotentials = mysqlTable("nextDayLimitUpPotentials", {
 
 export type NextDayLimitUpPotential = typeof nextDayLimitUpPotentials.$inferSelect;
 export type InsertNextDayLimitUpPotential = typeof nextDayLimitUpPotentials.$inferInsert;
+
+// 用户积分表
+export const userPoints = mysqlTable("userPoints", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  totalPoints: int("totalPoints").default(0).notNull(), // 总积分
+  usedPoints: int("usedPoints").default(0).notNull(), // 已使用积分
+  availablePoints: int("availablePoints").default(0).notNull(), // 可用积分
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UserPoints = typeof userPoints.$inferSelect;
+export type InsertUserPoints = typeof userPoints.$inferInsert;
+
+// 邀请记录表
+export const invitations = mysqlTable("invitations", {
+  id: int("id").autoincrement().primaryKey(),
+  inviterId: int("inviterId").notNull(), // 邀请者ID
+  inviteeId: int("inviteeId"), // 被邀请者ID（可能还未注册）
+  invitationCode: varchar("invitationCode", { length: 50 }).notNull().unique(), // 邀请码
+  invitationLink: text("invitationLink").notNull(), // 邀请链接
+  status: mysqlEnum("status", ["pending", "completed", "expired"]).default("pending").notNull(), // 邀请状态
+  inviterPointsRewarded: int("inviterPointsRewarded").default(0).notNull(), // 邀请者获得的积分
+  inviteePointsRewarded: int("inviteePointsRewarded").default(0).notNull(), // 被邀请者获得的积分
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  completedAt: timestamp("completedAt"), // 完成时间
+  expiresAt: timestamp("expiresAt"), // 过期时间
+});
+
+export type Invitation = typeof invitations.$inferSelect;
+export type InsertInvitation = typeof invitations.$inferInsert;
+
+// 用户订阅表
+export const userSubscriptions = mysqlTable("userSubscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  planType: mysqlEnum("planType", ["free", "monthly", "yearly"]).default("free").notNull(), // 订阅类型
+  price: int("price").default(0).notNull(), // 价格（单位：分）
+  pointsUsed: int("pointsUsed").default(0).notNull(), // 使用的积分数
+  status: mysqlEnum("status", ["active", "inactive", "expired", "cancelled"]).default("active").notNull(), // 订阅状态
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }), // Stripe订阅ID
+  startDate: timestamp("startDate").defaultNow().notNull(),
+  endDate: timestamp("endDate"), // 订阅结束日期
+  autoRenew: int("autoRenew").default(1).notNull(), // 是否自动续费
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UserSubscription = typeof userSubscriptions.$inferSelect;
+export type InsertUserSubscription = typeof userSubscriptions.$inferInsert;
+
+// 推送消息表
+export const pushNotifications = mysqlTable("pushNotifications", {
+  id: int("id").autoincrement().primaryKey(),
+  stockCode: varchar("stockCode", { length: 10 }).notNull(), // 股票代码
+  stockName: varchar("stockName", { length: 100 }).notNull(), // 股票名称
+  message: text("message").notNull(), // 推送信息
+  buyRange: varchar("buyRange", { length: 100 }).notNull(), // 买入区间
+  targetUsers: mysqlEnum("targetUsers", ["all", "premium", "specific"]).default("all").notNull(), // 目标用户
+  specificUserIds: text("specificUserIds"), // 特定用户ID列表（JSON）
+  pushChannels: varchar("pushChannels", { length: 100 }).default("wechat").notNull(), // 推送渠道
+  status: mysqlEnum("status", ["draft", "scheduled", "sent", "cancelled"]).default("draft").notNull(), // 推送状态
+  scheduledTime: timestamp("scheduledTime"), // 定时发送时间
+  sentTime: timestamp("sentTime"), // 实际发送时间
+  createdBy: int("createdBy").notNull(), // 创建者ID（管理员）
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PushNotification = typeof pushNotifications.$inferSelect;
+export type InsertPushNotification = typeof pushNotifications.$inferInsert;
+
+// 推送记录表
+export const pushLogs = mysqlTable("pushLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  pushNotificationId: int("pushNotificationId").notNull(), // 关联的推送消息ID
+  userId: int("userId").notNull(), // 接收用户ID
+  wechatId: varchar("wechatId", { length: 100 }), // 微信ID
+  status: mysqlEnum("status", ["pending", "sent", "failed", "read"]).default("pending").notNull(), // 发送状态
+  errorMessage: text("errorMessage"), // 错误信息
+  sentAt: timestamp("sentAt"), // 发送时间
+  readAt: timestamp("readAt"), // 阅读时间
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PushLog = typeof pushLogs.$inferSelect;
+export type InsertPushLog = typeof pushLogs.$inferInsert;
