@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { searchStocks, getMockStockDetail } from "@/lib/mockStockDetail";
+import { searchStocks } from "@/lib/stockDatabase";
 
 export default function TopSearchBar() {
   const [, setLocation] = useLocation();
