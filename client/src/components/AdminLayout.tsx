@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, Settings, Users, BarChart3, Cog } from "lucide-react";
+import { Menu, X, LogOut, Settings, Users, BarChart3, Cog, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AdminLayoutProps {
@@ -36,6 +36,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       label: "用户管理",
       icon: Users,
       path: "/admin/users",
+    },
+    {
+      label: "操作日志",
+      icon: FileText,
+      path: "/admin/logs",
     },
   ];
 

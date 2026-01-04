@@ -719,3 +719,65 @@
   - [x] 测试配置管理功能
   - [x] 测试用户管理功能
   - [x] 编译无错误
+
+## 第三十八阶段：操作日志系统（进行中）
+- [ ] 扩展数据库schema
+  - [ ] 创建adminLogs表
+  - [ ] 添加字段：id、adminId、action、resource、details、timestamp、ipAddress等
+  - [ ] 运行数据库迁移
+- [ ] 实现后端操作日志API
+  - [ ] 创建日志记录函数
+  - [ ] 实现getLogs路由（分页查询日志）
+  - [ ] 实现getLogStats路由（日志统计）
+  - [ ] 实现deleteOldLogs路由（清理旧日志）
+  - [ ] 添加权限验证
+- [ ] 修改管理员API
+  - [ ] updateConfig时记录日志
+  - [ ] deleteConfig时记录日志
+  - [ ] 其他操作添加日志记录
+- [ ] 构建操作日志查看页面
+  - [ ] 创建AdminLogs页面
+  - [ ] 显示日志列表（分页）
+  - [ ] 搜索和过滤功能
+  - [ ] 日志详情展示
+  - [ ] 导出日志功能
+- [ ] 测试和优化
+  - [ ] 测试日志记录
+  - [ ] 测试日志查询
+  - [ ] 性能优化
+## 第三十八阶段：操作日志系统（完成）
+- [x] 扩展数据库schema
+  - [x] 创建adminLogs表
+  - [x] 添加字段：id、adminId、action、resource、details、changes、status等
+  - [x] 运行数据库迁移
+- [x] 实现后端操作日志API
+  - [x] 创建adminLogsRouter.ts
+  - [x] 实现getLogs路由（分页查询日志）
+  - [x] 实现getLogStats路由（日志统计）
+  - [x] 实现createLog路由（创建日志）
+  - [x] 实现deleteOldLogs路由（清理旧日志）
+  - [x] 实现getResourceHistory路由（资源历史）
+  - [x] 添加权限验证
+- [x] 修改管理员API
+  - [x] updateConfig时记录日志
+  - [x] deleteConfig时记录日志
+  - [x] 创建logAdminAction辅助函数
+  - [x] 记录成功和失败状态
+  - [x] 记录变更内容
+- [x] 构建操作日志查看页面
+  - [x] 创建AdminLogs页面
+  - [x] 显示日志列表（分页）
+  - [x] 搜索和过滤功能（按操作类型、资源类型）
+  - [x] 日志详情展示
+  - [x] 统计卡片（总数、成功、失败）
+  - [x] 操作状态指示
+  - [x] 错误信息显示
+- [x] 集成到应用
+  - [x] 在AdminLayout中添加操作日志菜单
+  - [x] 在App.tsx中添加AdminLogs路由
+  - [x] 在routers.ts中添加adminLogsRouter
+- [x] 测试和优化
+  - [x] 验证编译无错误
+  - [x] 验证日志记录功能
+  - [x] 验证日志查询功能
+  - [x] 验证权限控制

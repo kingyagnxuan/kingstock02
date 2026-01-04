@@ -261,3 +261,23 @@ export const systemConfig = mysqlTable("systemConfig", {
 
 export type SystemConfig = typeof systemConfig.$inferSelect;
 export type InsertSystemConfig = typeof systemConfig.$inferInsert;
+
+// 管理员操作日志表
+export const adminLogs = mysqlTable("adminLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  adminId: int("adminId").notNull(), // 操作管理员ID
+  action: varchar("action", { length: 50 }).notNull(), // 操作类型：updateConfig、deleteConfig、updateUser等
+  resource: varchar("resource", { length: 100 }).notNull(), // 资源类型：config、user、system等
+  resourceId: varchar("resourceId", { length: 100 }), // 资源ID
+  details: text("details"), // 操作详情（JSON格式）
+  changes: text("changes"), // 变更内容（JSON格式，记录前后值）
+  status: mysqlEnum("status", ["success", "failed"]).default("success").notNull(), // 操作状态
+  errorMessage: text("errorMessage"), // 错误信息
+  ipAddress: varchar("ipAddress", { length: 50 }), // IP地址
+  userAgent: text("userAgent"), // User-Agent
+  timestamp: timestamp("timestamp").defaultNow().notNull(), // 操作时间
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AdminLog = typeof adminLogs.$inferSelect;
+export type InsertAdminLog = typeof adminLogs.$inferInsert;

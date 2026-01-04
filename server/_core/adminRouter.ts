@@ -1,8 +1,36 @@
 import { z } from "zod";
 import { adminProcedure, router } from "./trpc";
 import { getDb } from "../db";
-import { users, systemConfig } from "../../drizzle/schema";
+import { users, systemConfig, adminLogs } from "../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
+
+// 辅助函数：记录操作日志
+async function logAdminAction(
+  db: any,
+  adminId: number,
+  action: string,
+  resource: string,
+  resourceId?: string,
+  details?: any,
+  changes?: any,
+  status: "success" | "failed" = "success",
+  errorMessage?: string
+) {
+  try {
+    await db.insert(adminLogs).values({
+      adminId,
+      action,
+      resource,
+      resourceId,
+      details: typeof details === "string" ? details : JSON.stringify(details || {}),
+      changes: typeof changes === "string" ? changes : JSON.stringify(changes || {}),
+      status,
+      errorMessage,
+    });
+  } catch (err) {
+    console.error("Failed to log admin action:", err);
+  }
+}
 
 export const adminRouter = router({
   // 用户管理
@@ -113,32 +141,62 @@ export const adminRouter = router({
         .limit(1);
 
       const valueStr = typeof input.value === "string" ? input.value : JSON.stringify(input.value);
+      const isUpdate = existingConfig.length > 0;
+      const oldValue = isUpdate ? existingConfig[0].value : null;
 
-      if (existingConfig.length > 0) {
-        await db
-          .update(systemConfig)
-          .set({
+      try {
+        if (isUpdate) {
+          await db
+            .update(systemConfig)
+            .set({
+              value: valueStr,
+              description: input.description,
+              updatedAt: new Date(),
+              updatedBy: ctx.user?.id,
+            })
+            .where(eq(systemConfig.key, input.key));
+        } else {
+          await db.insert(systemConfig).values({
+            key: input.key,
             value: valueStr,
             description: input.description,
-            updatedAt: new Date(),
             updatedBy: ctx.user?.id,
-          })
-          .where(eq(systemConfig.key, input.key));
-      } else {
-        await db.insert(systemConfig).values({
-          key: input.key,
-          value: valueStr,
-          description: input.description,
-          updatedBy: ctx.user?.id,
-        });
-      }
+          });
+        }
 
-      return { success: true };
+        // 记录操作日志
+        await logAdminAction(
+          db,
+          ctx.user?.id || 0,
+          isUpdate ? "updateConfig" : "createConfig",
+          "config",
+          input.key,
+          { key: input.key, description: input.description },
+          { oldValue, newValue: valueStr },
+          "success"
+        );
+
+        return { success: true };
+      } catch (error) {
+        // 记录失败日志
+        await logAdminAction(
+          db,
+          ctx.user?.id || 0,
+          isUpdate ? "updateConfig" : "createConfig",
+          "config",
+          input.key,
+          { key: input.key },
+          undefined,
+          "failed",
+          error instanceof Error ? error.message : "Unknown error"
+        );
+        throw error;
+      }
     }),
 
   deleteConfig: adminProcedure
     .input(z.object({ key: z.string().min(1) }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) throw new Error("Database not available");
 
@@ -148,9 +206,37 @@ export const adminRouter = router({
         throw new Error("Cannot delete protected configuration");
       }
 
-      await db.delete(systemConfig).where(eq(systemConfig.key, input.key));
+      try {
+        await db.delete(systemConfig).where(eq(systemConfig.key, input.key));
 
-      return { success: true };
+        // 记录操作日志
+        await logAdminAction(
+          db,
+          ctx.user?.id || 0,
+          "deleteConfig",
+          "config",
+          input.key,
+          { key: input.key },
+          undefined,
+          "success"
+        );
+
+        return { success: true };
+      } catch (error) {
+        // 记录失败日志
+        await logAdminAction(
+          db,
+          ctx.user?.id || 0,
+          "deleteConfig",
+          "config",
+          input.key,
+          { key: input.key },
+          undefined,
+          "failed",
+          error instanceof Error ? error.message : "Unknown error"
+        );
+        throw error;
+      }
     }),
 
   // 系统统计
