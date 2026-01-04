@@ -239,6 +239,73 @@ export const adminRouter = router({
       }
     }),
 
+  // 设置用户角色
+  setUserRole: adminProcedure
+    .input(
+      z.object({
+        userId: z.number().int().positive(),
+        role: z.enum(["user", "admin"]),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      try {
+        // 防止管理员自己降级
+        if (input.userId === ctx.user?.id && input.role === "user") {
+          throw new Error("Cannot downgrade yourself from admin");
+        }
+
+        // 获取用户的旧角色
+        const userResult = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, input.userId))
+          .limit(1);
+
+        if (userResult.length === 0) {
+          throw new Error("User not found");
+        }
+
+        const oldRole = userResult[0].role;
+
+        // 更新用户角色
+        await db
+          .update(users)
+          .set({ role: input.role, updatedAt: new Date() })
+          .where(eq(users.id, input.userId));
+
+        // 记录操作日志
+        await logAdminAction(
+          db,
+          ctx.user?.id || 0,
+          "setUserRole",
+          "user",
+          input.userId.toString(),
+          { userId: input.userId, newRole: input.role },
+          { oldRole, newRole: input.role },
+          "success"
+        );
+
+        return { success: true };
+      } catch (error) {
+        // 记录失败日志
+        await logAdminAction(
+          db,
+          ctx.user?.id || 0,
+          "setUserRole",
+          "user",
+          input.userId.toString(),
+          { userId: input.userId, role: input.role },
+          undefined,
+          "failed",
+          error instanceof Error ? error.message : "Unknown error"
+        );
+        throw error;
+      }
+    }),
+
   // 系统统计
   getSystemStats: adminProcedure.query(async () => {
     const db = await getDb();

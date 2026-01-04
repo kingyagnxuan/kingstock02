@@ -58,6 +58,18 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     } else if (user.openId === ENV.ownerOpenId) {
       values.role = 'admin';
       updateSet.role = 'admin';
+    } else {
+      // 检查是否是第一个用户
+      const existingUsers = await db.select({ id: users.id }).from(users).limit(1);
+      if (existingUsers.length === 0) {
+        // 这是第一个用户，自动设置为管理员
+        values.role = 'admin';
+        updateSet.role = 'admin';
+      } else {
+        // 不是第一个用户，设置为普通用户
+        values.role = 'user';
+        updateSet.role = 'user';
+      }
     }
 
     if (!values.lastSignedIn) {

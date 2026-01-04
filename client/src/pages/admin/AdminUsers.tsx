@@ -4,18 +4,36 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Crown, User } from "lucide-react";
+import { toast } from "sonner";
 
 export default function AdminUsers() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{ userId: number; role: "admin" | "user" } | null>(null);
   const pageSize = 20;
+  const { user: currentUser } = useAuth();
 
   const usersQuery = trpc.admin.getUsers.useQuery({
     page,
     pageSize,
     search: search || undefined,
+  });
+
+  const setUserRoleMutation = trpc.admin.setUserRole.useMutation({
+    onSuccess: () => {
+      toast.success("用户角色已更新");
+      usersQuery.refetch();
+      setShowConfirm(false);
+      setConfirmAction(null);
+    },
+    onError: (error) => {
+      toast.error(error.message || "更新失败");
+    },
   });
 
   const handlePrevPage = () => {
@@ -28,6 +46,20 @@ export default function AdminUsers() {
     }
   };
 
+  const handleSetRole = (userId: number, newRole: "admin" | "user") => {
+    setConfirmAction({ userId, role: newRole });
+    setShowConfirm(true);
+  };
+
+  const confirmSetRole = () => {
+    if (confirmAction) {
+      setUserRoleMutation.mutate({
+        userId: confirmAction.userId,
+        role: confirmAction.role,
+      });
+    }
+  };
+
   const getRoleColor = (role: string) => {
     switch (role) {
       case "admin":
@@ -37,6 +69,10 @@ export default function AdminUsers() {
       default:
         return "bg-gray-500/20 text-gray-500 border-gray-500/20";
     }
+  };
+
+  const getRoleLabel = (role: string) => {
+    return role === "admin" ? "管理员" : "普通用户";
   };
 
   return (
@@ -94,7 +130,17 @@ export default function AdminUsers() {
                     </div>
                     <div className="flex items-center gap-4">
                       <Badge className={getRoleColor(user.role)}>
-                        {user.role === "admin" ? "管理员" : "普通用户"}
+                        {user.role === "admin" ? (
+                          <>
+                            <Crown className="w-3 h-3 mr-1" />
+                            {getRoleLabel(user.role)}
+                          </>
+                        ) : (
+                          <>
+                            <User className="w-3 h-3 mr-1" />
+                            {getRoleLabel(user.role)}
+                          </>
+                        )}
                       </Badge>
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground">加入时间</p>
@@ -109,6 +155,31 @@ export default function AdminUsers() {
                             ? new Date(user.lastSignedIn).toLocaleDateString()
                             : "未登录"}
                         </p>
+                      </div>
+                      <div className="flex gap-2">
+                        {user.role === "user" ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleSetRole(user.id, "admin")}
+                            disabled={setUserRoleMutation.isPending}
+                          >
+                            升级为管理员
+                          </Button>
+                        ) : currentUser?.id !== user.id ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleSetRole(user.id, "user")}
+                            disabled={setUserRoleMutation.isPending}
+                          >
+                            降级为用户
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="outline" disabled>
+                            当前用户
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -147,6 +218,39 @@ export default function AdminUsers() {
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
+          </div>
+        )}
+
+        {/* Confirmation Dialog */}
+        {showConfirm && confirmAction && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <Card className="w-96">
+              <CardHeader>
+                <CardTitle>确认操作</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  确定要将此用户{confirmAction.role === "admin" ? "升级为管理员" : "降级为普通用户"}吗？
+                </p>
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowConfirm(false);
+                      setConfirmAction(null);
+                    }}
+                  >
+                    取消
+                  </Button>
+                  <Button
+                    onClick={confirmSetRole}
+                    disabled={setUserRoleMutation.isPending}
+                  >
+                    {setUserRoleMutation.isPending ? "处理中..." : "确认"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
