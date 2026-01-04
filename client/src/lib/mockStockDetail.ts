@@ -216,11 +216,21 @@ export function getKLineData(code: string, period: KLinePeriod): KLineResponse {
  */
 export function searchStocks(query: string): Array<{ code: string; name: string; pinyin: string }> {
   const stocks = [
+    // 涨停追踪中的股票
+    { code: "300058", name: "蓝色光标", pinyin: "lsgs" },
+    { code: "600363", name: "联创光电", pinyin: "lccgd" },
+    { code: "300516", name: "久之洋", pinyin: "jzy" },
+    { code: "002131", name: "利欧股份", pinyin: "legs" },
+    { code: "601698", name: "中国卫通", pinyin: "zgwt" },
+    // 热点板块中的龙头股票
     { code: "000001", name: "平安银行", pinyin: "payh" },
     { code: "000002", name: "万科A", pinyin: "wka" },
     { code: "000333", name: "美的集团", pinyin: "mdjt" },
     { code: "000858", name: "五粮液", pinyin: "wly" },
     { code: "000651", name: "格力电器", pinyin: "gldq" },
+    { code: "000858", name: "五粮液", pinyin: "wly" },
+    { code: "000858", name: "五粮液", pinyin: "wly" },
+    // 其他热门股票
     { code: "600000", name: "浦发银行", pinyin: "pfyh" },
     { code: "600016", name: "民生银行", pinyin: "msyh" },
     { code: "600031", name: "三一重工", pinyin: "syzg" },
@@ -230,7 +240,9 @@ export function searchStocks(query: string): Array<{ code: string; name: string;
     { code: "600519", name: "贵州茅台", pinyin: "gzmt" },
     { code: "600900", name: "长江电力", pinyin: "cjdl" },
     { code: "601398", name: "工商银行", pinyin: "gsyh" },
-    { code: "601939", name: "建设银行", pinyin: "jsyh" }
+    { code: "601939", name: "建设银行", pinyin: "jsyh" },
+    { code: "600363", name: "中国海防", pinyin: "zghf" },
+    { code: "300058", name: "掌阅科技", pinyin: "zykj" }
   ];
 
   const lowerQuery = query.toLowerCase();
